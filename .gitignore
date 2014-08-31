@@ -1,0 +1,44 @@
+.externalToolBuilders/*
+.DS_Store
+.externalToolBuilders/*
+*/.externalToolBuilders/*
+.directory
+*.class
+*.orig
+*.dmp
+*.ilk
+*.pdb
+*.aqo
+*.beam
+*.cgo
+*.obj
+*.[oa]
+*.agllog
+*.dump
+*.ncb
+*.suo
+*.stackdump
+*.opensdf
+*.sdf
+*.vcxproj.*
+.#*
+_cache.ham
+
+## Xcode ##
+*.swp
+*~.nib
+*.pbxuser
+*.perspective
+*.perspectivev3
+*.mode1v3
+*.mode2v3
+xcuserdata/
+.xcodeproj/
+!*.xcodeproj/project.pbxproj
+
+## Android ##
+local.properties
+
+## Build Generated ##
+lib/*
+bin/*
