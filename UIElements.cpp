@@ -673,7 +673,8 @@ void ProcessCommandLineArguements(void)
 
    //if there is a list of command line arguements, then attach the console that launched the app 
    // in order to send text based output to the console
-   if(g_ArgC >= 1)
+   // PIERRE: At least 2 args needed, arg 0 is the process' path.
+   if(g_ArgC >= 2)
    {
       //set hourglass if command line options are being processed
       SetCursor(LoadCursor(NULL, IDC_WAIT));
@@ -1591,7 +1592,7 @@ void SetupGUI(void)
    g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetScrollBarWidth( 0 );
 
    g_pDisplayUIRegion->m_Dialog.AddCheckBox( IDC_SELECT_MIP_CHECKBOX, L"Select Mip Level", iX, iY += UI_ELEMENT_VERTICAL_SPACING - 2, 100, 16 );
-   g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetChecked(false);
+   g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetChecked(true);
 
    g_pDisplayUIRegion->m_Dialog.AddSlider( IDC_MIP_LEVEL, iX + 110, iY, UI_ELEMENT_WIDTH - 110, UI_ELEMENT_HEIGHT  );
    g_pDisplayUIRegion->m_Dialog.GetSlider( IDC_MIP_LEVEL )->SetRange( 0, 12 );

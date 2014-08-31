@@ -36,7 +36,7 @@ CCubeGenApp::CCubeGenApp(void)
    //default display options
    m_RenderTechnique = CG_RENDER_NORMAL;
    m_DisplayCubeSource = CG_CUBE_DISPLAY_INPUT;
-   m_bMipLevelSelectEnable = FALSE;
+   m_bMipLevelSelectEnable = TRUE;
    m_MipLevelDisplayed = 0;
    m_bShowAlpha = FALSE;
    // SL BEGIN
