@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -69,28 +69,28 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>bin/</OutDir>
-    <IntDir>bin/$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>bin/nt-x86</OutDir>
+    <IntDir>$(USERPROFILE)/_ham/obj/CubeGen/$(Platform)-$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)-$(PlatformName)-$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)_da</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>bin/</OutDir>
-    <IntDir>bin/$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>bin/nt-x64</OutDir>
+    <IntDir>$(USERPROFILE)/_ham/obj/CubeGen/$(Platform)-$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)-$(PlatformName)-$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)_da</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>bin/</OutDir>
-    <IntDir>bin/$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>bin/nt-x86</OutDir>
+    <IntDir>$(USERPROFILE)/_ham/obj/CubeGen/$(Platform)-$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)-$(PlatformName)-$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)_ra</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>bin/</OutDir>
-    <IntDir>bin/$(Platform)-$(Configuration)\</IntDir>
+    <OutDir>bin/nt-x64</OutDir>
+    <IntDir>$(USERPROFILE)/_ham/obj/CubeGen/$(Platform)-$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)-$(PlatformName)-$(Configuration)</TargetName>
+    <TargetName>$(ProjectName)_ra</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

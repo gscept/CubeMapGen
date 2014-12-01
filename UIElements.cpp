@@ -56,7 +56,7 @@
 
 #define UI_TECH_DROPHEIGHT 400
 
-//maximum message length output to message box 
+//maximum message length output to message box
 #define UI_MAX_MESSAGE_LENGTH 65536
 
 #define UI_MAX_FILENAME 4096
@@ -84,8 +84,8 @@ CModelViewerCamera      g_Camera;                       // The camera used to vi
 //CModelViewerCamera      g_Object;                     // arcball used to store the current rotation of the object
 int32                   g_DisplayLayoutSelect = COMBO_LAYOUT_EYE; //
 
-int32                   g_fEyeViewport[4];              // x, y, width, height 
-int32                   g_fUIViewport[4];               // x, y, width, height 
+int32                   g_fEyeViewport[4];              // x, y, width, height
+int32                   g_fUIViewport[4];               // x, y, width, height
 
 //UI regions for grouping UI options
 UIRegionManager*        g_pRegionManager = UIRegionManager::GetInstance();
@@ -124,7 +124,7 @@ WCHAR                   g_LoadCubeFaceFilename[UI_MAX_FILENAME] = L"";    // las
 WCHAR                   g_SaveCubeCrossPrefix[UI_MAX_FILENAME] = L"";     // last saved cubecross prefix
 WCHAR                   g_SaveCubeFacesPrefix[UI_MAX_FILENAME] = L"";     // last saved cubeface prefix
 
-HANDLE                  g_ConsoleHandle;                 // Console handle 
+HANDLE                  g_ConsoleHandle;                 // Console handle
 
 //--------------------------------------------------------------------------------------
 // UI control IDs
@@ -165,7 +165,7 @@ HANDLE                  g_ConsoleHandle;                 // Console handle
 #define IDC_CENTER_OBJECT              38
 
 
-//gui elements for filtering options 
+//gui elements for filtering options
 #define IDC_FILTER_CUBEMAP                  40
 #define IDC_BASE_FILTER_ANGLE               41
 #define IDC_MIP_INITIAL_FILTER_ANGLE        42
@@ -240,7 +240,7 @@ HANDLE                  g_ConsoleHandle;                 // Console handle
 // SL END
 
 //--------------------------------------------------------------------------------------
-// Forward declarations 
+// Forward declarations
 //--------------------------------------------------------------------------------------
 void OutputMessage(WCHAR *a_Title, WCHAR *a_Message, ...);
 
@@ -270,25 +270,25 @@ void    SetUIElementsUsingCurrentSettings(void);
 
 
 //--------------------------------------------------------------------------------------
-// Entry point to the program. Initializes everything and goes into a message processing 
+// Entry point to the program. Initializes everything and goes into a message processing
 // loop. Idle time is used to render the scene.
 //--------------------------------------------------------------------------------------
 INT WINAPI WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
 {
    //get command line arguements and convert into argc and argv format for later processing
-   // after D3D is fully initialized     
+   // after D3D is fully initialized
    g_pArgVList = CommandLineToArgvW(GetCommandLineW(), &g_ArgC );
 
    //output any help text if --help or -help command line options are specified
    ProcessCommandLineForHelpOptions();
 
    // Set the callback functions. These functions allow the sample framework to notify
-   // the application about device changes, user input, and windows messages.  The 
-   // callbacks are optional so you need only set callbacks for events you're interested 
-   // in. However, if you don't handle the device reset/lost callbacks then the sample 
-   // framework won't be able to reset your device since the application must first 
-   // release all device resources before resetting.  Likewise, if you don't handle the 
-   // device created/destroyed callbacks then the sample framework won't be able to 
+   // the application about device changes, user input, and windows messages.  The
+   // callbacks are optional so you need only set callbacks for events you're interested
+   // in. However, if you don't handle the device reset/lost callbacks then the sample
+   // framework won't be able to reset your device since the application must first
+   // release all device resources before resetting.  Likewise, if you don't handle the
+   // device created/destroyed callbacks then the sample framework won't be able to
    // recreate your device resources.
    DXUTSetCallbackDeviceCreated( OnCreateDevice );
    DXUTSetCallbackDeviceReset( OnResetDevice );
@@ -303,22 +303,30 @@ INT WINAPI WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
    // Show the cursor and clip it when in full screen
    DXUTSetCursorSettings( true, true );
 
-   // Initialize the sample framework and create the desired Win32 window and Direct3D 
+   // Initialize the sample framework and create the desired Win32 window and Direct3D
    // device for the application. Calling each of these functions is optional, but they
    // allow you to set several options which control the behavior of the framework.
 
-   // Note that the framework should not parse the 
+   // Note that the framework should not parse the
    DXUTInit( false, true, true );          // Do not parse the command line, handle the default hotkeys, and show msgboxes
    // SL BEGIN
-   DXUTCreateWindow( L"ModifiedCubeMapGen V1.66: CubeMap Filtering and MipChain Generator" );
+   DXUTCreateWindow( L"TalanSoft CubeMapGen v1.7"
+#if defined _M_IX86
+     L" (x86)"
+#elif defined _M_X64
+     L" (x64)"
+#else
+#error "Unknown architecture !"
+#endif
+     );
    // SL END
    DXUTCreateDevice( D3DADAPTER_DEFAULT, true, 1024, 768, IsDeviceAcceptable, ModifyDeviceSettings );
 
    //initialize ui elements
    SetupGUI();
 
-   // Pass control to the sample framework for handling the message pump and 
-   // dispatching render calls. The sample framework will call your FrameMove 
+   // Pass control to the sample framework for handling the message pump and
+   // dispatching render calls. The sample framework will call your FrameMove
    // and FrameRender callback when there is idle time between handling window messages.
    DXUTMainLoop();
 
@@ -329,7 +337,7 @@ INT WINAPI WinMain( HINSTANCE, HINSTANCE, LPSTR, int )
 }
 
 //---------------------------------------------------------------------------------------------
-// Stores the Current Mode and then Sets Windowed Mode 
+// Stores the Current Mode and then Sets Windowed Mode
 //
 // needed to display windows common dialogs
 //---------------------------------------------------------------------------------------------
@@ -337,7 +345,7 @@ void StoreCurrentModeThenSetWindowedMode(void)
 {
    if(DXUTIsWindowed() == true)
    {
-      g_bOldModeWindowed = true;      
+      g_bOldModeWindowed = true;
    }
    else
    {
@@ -366,13 +374,13 @@ void RestoreOldMode(void)
 
 //------------------------------------------------------------------------------------------
 // Compares a string a_Str to see if it contains the prefix a_Prefix
-// 
+//
 // If so the function returns true, and a pointer to the first character after the prefix
 //------------------------------------------------------------------------------------------
 bool WCPrefixCmp(WCHAR *a_Str, WCHAR *a_Prefix, WCHAR **a_AfterPrefix)
 {
    if( wcsncmp(a_Str, a_Prefix, wcslen(a_Prefix)) == 0 )
-   {            
+   {
       *a_AfterPrefix = (a_Str + wcslen(a_Prefix));
 
       return true;
@@ -431,7 +439,7 @@ void ConsoleOutputMessageCallback(WCHAR *a_TitleStr, WCHAR *a_MessageStr)
   // DWORD consoleCharWritten;
    WCHAR messageString[4096];
 
-   //title 
+   //title
    _snwprintf_s(messageString, 4096, 4096, L"%s: %s", a_TitleStr, a_MessageStr );
 
    //console output
@@ -444,22 +452,22 @@ void ConsoleOutputMessageCallback(WCHAR *a_TitleStr, WCHAR *a_MessageStr)
 //-------------------------------------------------------------------------------------------
 INT_PTR CALLBACK ProgressDialogMsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 {
-   switch (uMsg) 
-   { 
-      case WM_COMMAND: 
-         switch (LOWORD(wParam)) 
-         { 
-            case IDC_CANCEL_FILTERING_BUTTON: 
+   switch (uMsg)
+   {
+      case WM_COMMAND:
+         switch (LOWORD(wParam))
+         {
+            case IDC_CANCEL_FILTERING_BUTTON:
                //cancel filtering;
                fwprintf(stderr, L"User Terminated Filtering!");
                exit(EM_FATAL_ERROR);
-               return TRUE; 
+               return TRUE;
             break;
          }
       break;
-   } 
+   }
 
-   return FALSE; 
+   return FALSE;
 
 }
 
@@ -469,7 +477,7 @@ INT_PTR CALLBACK ProgressDialogMsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPA
 //--------------------------------------------------------------------------------------
 // ProcessCommandLineForHelpOptions
 //
-//  This function is called before window instantiation in order to print out help options 
+//  This function is called before window instantiation in order to print out help options
 // from the command line interface if needed without popping up the application window.
 //
 //--------------------------------------------------------------------------------------
@@ -482,7 +490,7 @@ void ProcessCommandLineForHelpOptions(void)
 
    g_pArgVList = CommandLineToArgvW(GetCommandLineW(), &g_ArgC );
 
-   //if there is a list of command line arguements, then attach the console that launched the app 
+   //if there is a list of command line arguements, then attach the console that launched the app
    // in order to display text based output
    for(iCmdLine=1; iCmdLine < g_ArgC; iCmdLine++)
    {
@@ -490,7 +498,7 @@ void ProcessCommandLineForHelpOptions(void)
 
       //help string for HDR shop
       if( WCPrefixCmp(cmdArg, L"--help", &suffixStr) || WCPrefixCmp(cmdArg, L"-help", &suffixStr) )
-      {       
+      {
          ATTACHCONSOLEPROC AttachConsoleFunc;
 
          AttachConsoleFunc = (ATTACHCONSOLEPROC)GetProcAddress(GetModuleHandle(L"Kernel32.dll"), "AttachConsole");
@@ -502,15 +510,15 @@ void ProcessCommandLineForHelpOptions(void)
          }
          else
          {  //for win2k and less just create another console
-            AllocConsole();      
+            AllocConsole();
          }
 
          consoleStdErr = GetStdHandle(STD_ERROR_HANDLE);
 
 
-         ConsoleOutput(consoleStdErr, 
+         ConsoleOutput(consoleStdErr,
 			 // SL BEGIN
-            "ModifiedCubeMapGen: A Cubemap Filtering, Mipchain Generation,  and Realtime Preview Tool\n"
+            "TalanSoft CubeMapGen: A Cubemap Filtering, Mipchain Generation,  and Realtime Preview Tool\n"
 			// SL END
             "AMD 3D Application Research Group\n"
             "\n"
@@ -518,11 +526,11 @@ void ProcessCommandLineForHelpOptions(void)
 
          if( WCPrefixCmp(cmdArg, L"--help", &suffixStr) )
          { //if HDRShop help command
-            ConsoleOutput(consoleStdErr, 
+            ConsoleOutput(consoleStdErr,
                "Notes: There seems to be an HDRShop issue where if the filtering takes too long, HDRShop\n"
                " will overwrite the filtering results.  In this case, the message box pops up a warning\n"
                " stating that ''The plugin does not exit when queried for parameters.''  If this happens\n"
-               " CubeMapGen writes out a backup file cube cross named ''HDRShopBackupCross.pfm''\n" 
+               " CubeMapGen writes out a backup file cube cross named ''HDRShopBackupCross.pfm''\n"
                " that can be loaded back into HDRShop once the filtering is complete.\n"
                "HDRSHOPVERSION: 1.0.1 \n\n"
                "HDRSHOPFLAGS:\n\n"
@@ -531,7 +539,7 @@ void ProcessCommandLineForHelpOptions(void)
                );
          }
 
-         ConsoleOutput(consoleStdErr, 
+         ConsoleOutput(consoleStdErr,
             "OPTIONS:\n"
             " -baseFilterAngle:[float=0.0]  Initial filtering angle for base level of cubemap.\n"
             " -initialMipFilterAngle:[float=0.2]  Filtering angle to generate second mip-level of cubemap.\n"
@@ -559,7 +567,7 @@ void ProcessCommandLineForHelpOptions(void)
             " -exportSize:[int=128] Size of cubemap to export\n"
             " -exportScaleFactor:[float=1.0]  Scale factor to apply to intensity values prior to export gamma. \n"
             " -exportGamma:[float=1.0]  Gamma to apply to filtered and intensity scaled cubemap prior to export. \n"
-            " -exportFilename:[string=Cube.dds]  Filename for saving all cube faces to a single .dds file. \n" 
+            " -exportFilename:[string=Cube.dds]  Filename for saving all cube faces to a single .dds file. \n"
             " -exportPixelFormat:{R8G8B8|A8R8G8B8|A16B16G16R16|A16B16G16R16F|A32B32G32R32F}  Output pixel encoding (.DDS files) \n"
             " -exportCubeDDS    Export all cube map faces within a single .dds file. \n"
             " -exportMipChain   Export entire mipchain when exporting cubemap. \n"
@@ -571,7 +579,7 @@ void ProcessCommandLineForHelpOptions(void)
          //if not called from HDR shop e.g. --help, output additional help options
          if( WCPrefixCmp(cmdArg, L"-help", &suffixStr) )
          {
-            ConsoleOutput(consoleStdErr, 
+            ConsoleOutput(consoleStdErr,
                " -exportFileFormat:{BMP|JPG|PNG|DDS|DIB|HDR|PFM} Export File Format\n"
                " -exportFacePrefix:[string=CubeFace]  Filename prefix for series of face images. \n"
                " -exportCrossPrefix:[string=CubeCross]  Filename prefix for cubecross image(s). \n"
@@ -579,12 +587,12 @@ void ProcessCommandLineForHelpOptions(void)
                " -exportCubeCross  Export all cube map faces in an HDRShop cube cross layout. \n"
                " -importCubeDDS:[string=cube.dds]  Import entire cube map from a single dds file \n"
                " -importCubeCross:[string=cubecross.hdr] Import Cube Cross \n"
-               " -importFaceXPos:[string=xpos.hdr] Load image into the X positive cube map face of the input cubemap.\n" 
-               " -importFaceXNeg:[string=xneg.hdr] Load image into the X negative cube map face of the input cubemap.\n" 
-               " -importFaceYPos:[string=ypos.hdr] Load image into the Y positive cube map face of the input cubemap.\n" 
-               " -importFaceYNeg:[string=yneg.hdr] Load image into the Y negative cube map face of the input cubemap.\n" 
-               " -importFaceZPos:[string=zpos.hdr] Load image into the Z positive cube map face of the input cubemap.\n" 
-               " -importFaceZNeg:[string=zneg.hdr] Load image into the Z negative cube map face of the input cubemap.\n" 
+               " -importFaceXPos:[string=xpos.hdr] Load image into the X positive cube map face of the input cubemap.\n"
+               " -importFaceXNeg:[string=xneg.hdr] Load image into the X negative cube map face of the input cubemap.\n"
+               " -importFaceYPos:[string=ypos.hdr] Load image into the Y positive cube map face of the input cubemap.\n"
+               " -importFaceYNeg:[string=yneg.hdr] Load image into the Y negative cube map face of the input cubemap.\n"
+               " -importFaceZPos:[string=zpos.hdr] Load image into the Z positive cube map face of the input cubemap.\n"
+               " -importFaceZNeg:[string=zneg.hdr] Load image into the Z negative cube map face of the input cubemap.\n"
                " -flipFaceXPos:{H|V|D|HV|HD|VD|HVD} Flip XPos Cubemap faces {V}ertically, {H}orizontally, and/or {D}iagonally\n"
                " -flipFaceXNeg:{H|V|D|HV|HD|VD|HVD} Flip XNeg Cubemap faces {V}ertically, {H}orizontally, and/or {D}iagonally\n"
                " -flipFaceYPos:{H|V|D|HV|HD|VD|HVD} Flip YPos Cubemap faces {V}ertically, {H}orizontally, and/or {D}iagonally\n"
@@ -593,7 +601,7 @@ void ProcessCommandLineForHelpOptions(void)
                " -flipFaceZNeg:{H|V|D|HV|HD|VD|HVD} Flip ZNeg Cubemap faces {V}ertically, {H}orizontally, and/or {D}iagonally\n"
                " -consoleErrorOutput   Output error messages to console. \n"
                " Press any key to exit.\n\n"
-               );            
+               );
 
             DWORD numEvents = 0;
             HANDLE conin;
@@ -606,12 +614,12 @@ void ProcessCommandLineForHelpOptions(void)
                while(numEvents < 3)
                {
                   GetNumberOfConsoleInputEvents(
-                     conin, 
+                     conin,
                      &numEvents
                      );
                }
             }
-         }        
+         }
 
          exit(EM_EXIT_NO_ERROR );
       }
@@ -671,7 +679,7 @@ void ProcessCommandLineArguements(void)
 
    g_pArgVList = CommandLineToArgvW(GetCommandLineW(), &g_ArgC );
 
-   //if there is a list of command line arguements, then attach the console that launched the app 
+   //if there is a list of command line arguements, then attach the console that launched the app
    // in order to send text based output to the console
    // PIERRE: At least 2 args needed, arg 0 is the process' path.
    if(g_ArgC >= 2)
@@ -692,7 +700,7 @@ void ProcessCommandLineArguements(void)
       }
       else
       {  //for win2k and less just create another console
-         AllocConsole();      
+         AllocConsole();
       }
 
 
@@ -725,15 +733,15 @@ void ProcessCommandLineArguements(void)
          SetErrorMessageCallback( ConsoleOutputMessageCallback );
       }
       else if( WCPrefixCmp(cmdArg, L"-baseFilterAngle:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_BaseFilterAngle = (float32)_wtof(suffixStr);
       }
       else if( WCPrefixCmp(cmdArg, L"-initialMipFilterAngle:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_MipInitialFilterAngle = (float32)_wtof(suffixStr);
       }
       else if( WCPrefixCmp(cmdArg, L"-perLevelMipFilterScale:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_MipFilterAngleScale = (float32)_wtof(suffixStr);
       }
       else if( WCPrefixCmp(cmdArg, L"-solidAngleWeighting", &suffixStr) )
@@ -742,22 +750,22 @@ void ProcessCommandLineArguements(void)
       }
       // SL BEGIN
 	  else if( WCPrefixCmp(cmdArg, L"-CosinePower:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_SpecularPower = (float32)_wtof(suffixStr);
       }
 	  else if( WCPrefixCmp(cmdArg, L"-CosinePowerDropPerMip:", &suffixStr) )
-	  {            
+	  {
 		  g_CubeGenApp.m_CosinePowerDropPerMip = (float32)_wtof(suffixStr);
 	  }
 	  else if( WCPrefixCmp(cmdArg, L"-NumMipmap:", &suffixStr) )
-	  {            
+	  {
 		  g_CubeGenApp.m_NumMipmap = (uint32)_wtoi(suffixStr);
 	  }
 	  else if( WCPrefixCmp(cmdArg, L"-CosinePowerMipmapChainMode:", &suffixStr) )
-	  {            
+	  {
 		  if( wcscmp(L"Mipmap", suffixStr) == 0 )
 		  {
-			  g_CubeGenApp.m_CosinePowerMipmapChainMode = CP_COSINEPOWER_CHAIN_MIPMAP; 
+			  g_CubeGenApp.m_CosinePowerMipmapChainMode = CP_COSINEPOWER_CHAIN_MIPMAP;
 		  }
 		  else if( wcscmp(L"Drop", suffixStr) == 0 )
 		  {
@@ -781,7 +789,7 @@ void ProcessCommandLineArguements(void)
       {
          if( wcscmp(L"Phong", suffixStr) == 0 )
          {
-            g_CubeGenApp.m_LightingModel = CP_LIGHTINGMODEL_PHONG; 
+            g_CubeGenApp.m_LightingModel = CP_LIGHTINGMODEL_PHONG;
          }
          else if( wcscmp(L"PhongBRDF", suffixStr) == 0 )
          {
@@ -802,11 +810,11 @@ void ProcessCommandLineArguements(void)
          }
       }
 	  else if( WCPrefixCmp(cmdArg, L"-GlossScale:", &suffixStr) )
-	  {            
+	  {
 		  g_CubeGenApp.m_GlossScale = (float32)_wtof(suffixStr);
 	  }
 	  else if( WCPrefixCmp(cmdArg, L"-GlossBias:", &suffixStr) )
-	  {            
+	  {
 		  g_CubeGenApp.m_GlossBias = (float32)_wtof(suffixStr);
 	  }
      // SL END
@@ -818,7 +826,7 @@ void ProcessCommandLineArguements(void)
       { //{Disc|Cone|AngularGaussian}\n"
          if( wcscmp(L"Disc", suffixStr) == 0 )
          {
-            g_CubeGenApp.m_FilterTech = CP_FILTER_TYPE_DISC; 
+            g_CubeGenApp.m_FilterTech = CP_FILTER_TYPE_DISC;
          }
          else if( wcscmp(L"Cone", suffixStr) == 0 )
          {
@@ -848,7 +856,7 @@ void ProcessCommandLineArguements(void)
       { //{None|LinearPull|HermitePull|LinearAverage|HermiteAverage} Technique used for cubemap edge fixup \n"
          if( wcscmp(L"None", suffixStr) == 0 )
          {
-            g_CubeGenApp.m_EdgeFixupTech = CP_FIXUP_NONE; 
+            g_CubeGenApp.m_EdgeFixupTech = CP_FIXUP_NONE;
          }
          else if( wcscmp(L"LinearPull", suffixStr) == 0 )
          {
@@ -874,7 +882,7 @@ void ProcessCommandLineArguements(void)
          else if( wcscmp(L"Warp", suffixStr) == 0 )
          {
             g_CubeGenApp.m_EdgeFixupTech = CP_FIXUP_WARP;
-         }		 
+         }
          else if( wcscmp(L"Stretch", suffixStr) == 0 )
          {
             g_CubeGenApp.m_EdgeFixupTech = CP_FIXUP_STRETCH;
@@ -887,7 +895,7 @@ void ProcessCommandLineArguements(void)
          }
       }
       else if( WCPrefixCmp(cmdArg, L"-edgeFixupWidth:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_EdgeFixupWidth = (int32)_wtoi(suffixStr);
          if(g_CubeGenApp.m_EdgeFixupWidth == 0)
          {
@@ -895,46 +903,46 @@ void ProcessCommandLineArguements(void)
          }
          else
          {
-            g_CubeGenApp.m_bCubeEdgeFixup = TRUE;            
+            g_CubeGenApp.m_bCubeEdgeFixup = TRUE;
          }
       }
       else if( WCPrefixCmp(cmdArg, L"-importMaxClamp:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_InputMaxClamp = (float32)_wtof(suffixStr);
       }
       else if( WCPrefixCmp(cmdArg, L"-importDegamma:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_InputDegamma = (float32)_wtof(suffixStr);
       }
       else if( WCPrefixCmp(cmdArg, L"-exportSize:", &suffixStr) )
-      {            
+      {
          bExportSizeSet = true;
          g_CubeGenApp.SetOutputCubeMapSize((int32)_wtoi(suffixStr));
       }
       else if( WCPrefixCmp(cmdArg, L"-exportScaleFactor:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_OutputScaleFactor = (float32)_wtof(suffixStr);
       }
       else if( WCPrefixCmp(cmdArg, L"-exportGamma:", &suffixStr) )
-      {            
+      {
          g_CubeGenApp.m_OutputGamma = (float32)_wtof(suffixStr);
       }
       else if( WCPrefixCmp(cmdArg, L"-importFilename:", &suffixStr) )
       {
          wcsncpy_s(g_CubeGenApp.m_InputCubeMapFilename, CG_MAX_FILENAME_LENGTH, suffixStr, _MAX_PATH);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-exportFilename:", &suffixStr) )
       {
          wcsncpy_s(g_CubeGenApp.m_OutputCubeMapFilename, CG_MAX_FILENAME_LENGTH, suffixStr, _MAX_PATH);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-exportFacePrefix:", &suffixStr) )
       {
          wcsncpy_s(exportFacePrefix, _MAX_PATH, suffixStr, _MAX_PATH);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-exportCrossPrefix:", &suffixStr) )
       {
          wcsncpy_s(exportCrossPrefix, _MAX_PATH, suffixStr, _MAX_PATH);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-exportFileFormat:", &suffixStr) )
       { //{BMP|JPG|TGA|PNG|DDS|PPM|DIB|HDR|PFM}
          if( wcscmp(L"BMP", suffixStr) == 0 )
@@ -943,12 +951,12 @@ void ProcessCommandLineArguements(void)
          }
          else if( wcscmp(L"JPG", suffixStr) == 0 )
          {
-            exportFileFormat = D3DXIFF_JPG;            
+            exportFileFormat = D3DXIFF_JPG;
          }
          //targa not supported on export
          //else if( wcscmp(L"TGA", suffixStr) == 0 )
          // {
-         //    exportFileFormat = D3DXIFF_TGA;            
+         //    exportFileFormat = D3DXIFF_TGA;
          //}
          else if( wcscmp(L"PNG", suffixStr) == 0 )
          {
@@ -975,7 +983,7 @@ void ProcessCommandLineArguements(void)
             bInvalidOption = true;
             break;
          }
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-exportPixelFormat:", &suffixStr) )
       { //{R8G8B8| 8B8G8R8|A16R16G16B16|A16R16G16B16F|A32R32G32B32F} Output pixel encoding (.DDS files)\n"
          if( wcscmp(L"A8R8G8B8", suffixStr) == 0 )
@@ -1003,10 +1011,10 @@ void ProcessCommandLineArguements(void)
             bInvalidOption = true;
             break;
          }
-      }       
+      }
       //if a filename is specified with import cube DDS, load the file
       else if( WCPrefixCmp(cmdArg, L"-importCubeDDS:", &suffixStr) )
-      {   
+      {
          // load input cubemap
          bImportCubeDDS = true;
 
@@ -1014,48 +1022,48 @@ void ProcessCommandLineArguements(void)
          //g_CubeGenApp.LoadInputCubeMap();
       }//if no filename is specified, then load file specified by option -importFilename:
       else if( WCPrefixCmp(cmdArg, L"-importCubeDDS", &suffixStr) )
-      {   
+      {
          // load input cubemap
          bImportCubeDDS = true;
          //g_CubeGenApp.LoadInputCubeMap();
       }
       //if a filename is specified with import cube cross, load the file
       else if( WCPrefixCmp(cmdArg, L"-importCubeCross:", &suffixStr) )
-      {   
+      {
          // load input cubecross
          wcsncpy_s(importCubeCrossFilename, _MAX_PATH, suffixStr, _MAX_PATH);
-         g_CubeGenApp.LoadInputCubeCross(importCubeCrossFilename); 
+         g_CubeGenApp.LoadInputCubeCross(importCubeCrossFilename);
       }
       else if( WCPrefixCmp(cmdArg, L"-importFaceXPos:", &suffixStr) )
       {
          g_CubeGenApp.m_SelectedCubeFace = CP_FACE_X_POS;
          g_CubeGenApp.LoadSelectedCubeMapFace(suffixStr);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-importFaceXNeg:", &suffixStr) )
       {
          g_CubeGenApp.m_SelectedCubeFace = CP_FACE_X_NEG;
          g_CubeGenApp.LoadSelectedCubeMapFace(suffixStr);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-importFaceYPos:", &suffixStr) )
       {
          g_CubeGenApp.m_SelectedCubeFace = CP_FACE_Y_POS;
          g_CubeGenApp.LoadSelectedCubeMapFace(suffixStr);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-importFaceYNeg:", &suffixStr) )
       {
          g_CubeGenApp.m_SelectedCubeFace = CP_FACE_Y_NEG;
          g_CubeGenApp.LoadSelectedCubeMapFace(suffixStr);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-importFaceZPos:", &suffixStr) )
       {
          g_CubeGenApp.m_SelectedCubeFace = CP_FACE_Z_POS;
          g_CubeGenApp.LoadSelectedCubeMapFace(suffixStr);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-importFaceZNeg:", &suffixStr) )
       {
          g_CubeGenApp.m_SelectedCubeFace = CP_FACE_Z_NEG;
          g_CubeGenApp.LoadSelectedCubeMapFace(suffixStr);
-      }       
+      }
       else if( WCPrefixCmp(cmdArg, L"-flipFaceXPos:", &suffixStr) )
       {
          g_CubeGenApp.m_SelectedCubeFace = CP_FACE_X_POS;
@@ -1159,20 +1167,20 @@ void ProcessCommandLineArguements(void)
          }
       }
       else if( WCPrefixCmp(cmdArg, L"-exportCubeDDS", &suffixStr) )
-      {   
+      {
          bExportCubeDDS = true;
       }
       else if( WCPrefixCmp(cmdArg, L"-exportCubeFaces", &suffixStr) )
-      {   
+      {
          bExportCubeFaces = true;
 
       }
       else if( WCPrefixCmp(cmdArg, L"-exportCubeCross", &suffixStr) )
-      {   
+      {
          bExportCross = true;
       }
       else if( WCPrefixCmp(cmdArg, L"-exportMipChain", &suffixStr) )
-      {   
+      {
          g_CubeGenApp.m_bExportMipChain = true;
       }
       else if( WCPrefixCmp(cmdArg, L"-numFilterThreads:", &suffixStr) )
@@ -1192,8 +1200,8 @@ void ProcessCommandLineArguements(void)
          }
       }
       else if( WCPrefixCmp(cmdArg, L"-exit", &suffixStr) )
-      {   
-         bExit = true;   
+      {
+         bExit = true;
       }
       else if( wcscmp(cmdArg, L"-forceRefRast") == 0 )
       {
@@ -1207,11 +1215,11 @@ void ProcessCommandLineArguements(void)
          {
             m_bHDRShopMode = true;
             wcscpy_s(importCubeCrossFilename, _MAX_PATH, cmdArg);
-            g_CubeGenApp.LoadInputCubeCross(importCubeCrossFilename);                                    
+            g_CubeGenApp.LoadInputCubeCross(importCubeCrossFilename);
          }
          //if second option on command line, this is the filename for the cube cross to be exported
          else if(iCmdLine == 2)
-         {            
+         {
             m_bHDRShopMode = true;
             wcscpy_s(HDRShopExportCubeCrossPrefix, _MAX_PATH, cmdArg);
             bExportHDRShopCross = true;
@@ -1245,7 +1253,7 @@ void ProcessCommandLineArguements(void)
          while(numEvents < 3)
          {
             GetNumberOfConsoleInputEvents(
-               conin, 
+               conin,
                &numEvents
                );
          }
@@ -1283,8 +1291,8 @@ void ProcessCommandLineArguements(void)
          g_CubeGenApp.FilterCubeMap();
          bHasBeenFiltered = true;
       }
-         
-   
+
+
       if(m_bHDRShopMode == true)
       {  //show filtering progress dialog if HDRShop initialized the app
          MSG msg;
@@ -1295,7 +1303,7 @@ void ProcessCommandLineArguements(void)
             DXUTGetHWND(),             //parent
             ProgressDialogMsgProc      //dialog message handler
             );
-         
+
          ShowWindow(progressDialogWnd, SW_SHOW);
 
          //setup progress bar initial settings
@@ -1324,15 +1332,15 @@ void ProcessCommandLineArguements(void)
       while(g_CubeGenApp.m_CubeMapProcessor.GetStatus() == CP_STATUS_PROCESSING)
       {
          Sleep(100);
-         
+
          if(m_bHDRShopMode == true)
          {  //sleep for a little while, then update progress
             MSG msg;
             HWND progressBarWnd;
 
-            //update dialog progress bar and static text            
-            SetDlgItemText(progressDialogWnd, 
-               IDC_PROGRESS_TEXT_STATIC, 
+            //update dialog progress bar and static text
+            SetDlgItemText(progressDialogWnd,
+               IDC_PROGRESS_TEXT_STATIC,
                g_CubeGenApp.m_CubeMapProcessor.GetFilterProgressString()
                );
 
@@ -1340,9 +1348,9 @@ void ProcessCommandLineArguements(void)
 
             //the progress bar range is sent through the wparam
             SendMessage(progressBarWnd, PBM_SETRANGE, 0, MAKELPARAM(0, 1000));
-   
+
             //the progress bar setting is sent through the wparam
-            SendMessage(progressBarWnd, PBM_SETPOS, 
+            SendMessage(progressBarWnd, PBM_SETPOS,
 				// SL BEGIN
                1000.0f * g_CubeGenApp.m_CubeMapProcessor.sg_ThreadFilterFace[0].m_ThreadProgress.m_FractionCompleted,
 				// SL END
@@ -1357,7 +1365,7 @@ void ProcessCommandLineArguements(void)
 
                //pass message to the winproc
                DispatchMessage(&msg);
-            }         
+            }
          }
          else
          {
@@ -1370,7 +1378,7 @@ void ProcessCommandLineArguements(void)
             ConsoleOutputW(consoleStdErr, L"\b\b\b\b\b\b\b\b\b\b");  //backspace
             ConsoleOutputW(consoleStdErr, L"\b\b\b\b\b\b\b\b\b\b");  //backspace
             ConsoleOutputW(consoleStdErr, L"\b\b\b\b\b\b\b\b\b\b");  //backspace
-           
+
             ConsoleOutputW(consoleStdErr, L"\r");                    //carriage return
             ConsoleOutputW(consoleStdErr, g_CubeGenApp.m_CubeMapProcessor.GetFilterProgressString() ); //erase 10 spaces
          }
@@ -1392,17 +1400,17 @@ void ProcessCommandLineArguements(void)
 
       if(bExportCubeDDS == true)
       {
-         g_CubeGenApp.SaveOutputCubeMap();            
+         g_CubeGenApp.SaveOutputCubeMap();
       }
 
       if(bExportCubeFaces == true)
       {
-         g_CubeGenApp.SaveOutputCubeMapToFiles(exportFacePrefix, exportFileFormat);            
+         g_CubeGenApp.SaveOutputCubeMapToFiles(exportFacePrefix, exportFileFormat);
       }
 
       if(bExportCross == true)
       {
-         g_CubeGenApp.SaveOutputCubeMapToCrosses(exportCrossPrefix, exportFileFormat);            
+         g_CubeGenApp.SaveOutputCubeMapToCrosses(exportCrossPrefix, exportFileFormat);
       }
 
       if(bExportHDRShopCross == true)
@@ -1417,8 +1425,8 @@ void ProcessCommandLineArguements(void)
          //save old mip setting
          oldSaveMipSetting = g_CubeGenApp.m_bExportMipChain;
          g_CubeGenApp.m_bExportMipChain = false;
-         g_CubeGenApp.SaveOutputCubeMapToCrosses(HDRShopExportCubeCrossPrefix, D3DXIFF_PFM);                  
-         g_CubeGenApp.SaveOutputCubeMapToCrosses( L"HDRShopBackupCross", D3DXIFF_PFM);                  
+         g_CubeGenApp.SaveOutputCubeMapToCrosses(HDRShopExportCubeCrossPrefix, D3DXIFF_PFM);
+         g_CubeGenApp.SaveOutputCubeMapToCrosses( L"HDRShopBackupCross", D3DXIFF_PFM);
 
          //restore old mip and format settings
          g_CubeGenApp.m_bExportMipChain = oldSaveMipSetting;
@@ -1445,12 +1453,12 @@ void ProcessCommandLineArguements(void)
       }
       else
       {
-         exit( EM_EXIT_NONFATAL_ERROR_OCCURRED );      
+         exit( EM_EXIT_NONFATAL_ERROR_OCCURRED );
       }
    }
 
    if(m_bHDRShopMode == true)
-   {  
+   {
       //hide progress window if HDRShop initialized the app
       ShowWindow(progressDialogWnd, SW_HIDE);
    }
@@ -1524,7 +1532,7 @@ void SetupGUI(void)
    g_pLoadSaveUIRegion->m_Dialog.AddButton( IDC_LOAD_OBJECT, L"Load Object", iX, iY += UI_ELEMENT_VERTICAL_SPACING, 120, UI_ELEMENT_HEIGHT, NULL );
 
    g_pLoadSaveUIRegion->m_Dialog.AddButton( IDC_SET_SPHERE_OBJECT, L"Sphere", iX + 120, iY, UI_ELEMENT_WIDTH-120, UI_ELEMENT_HEIGHT, NULL );
-   
+
    g_pLoadSaveUIRegion->m_Dialog.AddButton( IDC_LOAD_CUBEMAP, L"Load CubeMap(.dds)", iX, iY += UI_ELEMENT_VERTICAL_SPACING, 120, UI_ELEMENT_HEIGHT, NULL );
    g_pLoadSaveUIRegion->m_Dialog.AddButton( IDC_SET_COLORCUBE, L"ColorCube", iX+120, iY, UI_ELEMENT_WIDTH-120, UI_ELEMENT_HEIGHT, NULL );
 
@@ -1534,7 +1542,7 @@ void SetupGUI(void)
    g_pLoadSaveUIRegion->m_Dialog.AddButton( IDC_SAVE_CUBEMAP, L"Save CubeMap (.dds)", iX, iY += UI_ELEMENT_VERTICAL_SPACING, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT, NULL );
    g_pLoadSaveUIRegion->m_Dialog.AddButton( IDC_SAVE_CUBEMAP_TO_IMAGES, L"Save CubeMap to Images", iX, iY += UI_ELEMENT_VERTICAL_SPACING, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT, NULL);
    g_pLoadSaveUIRegion->m_Dialog.AddButton( IDC_SAVE_CUBE_CROSS, L"Save Cube Cross", iX, iY += UI_ELEMENT_VERTICAL_SPACING, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT, NULL);
-      
+
    g_pLoadSaveUIRegion->m_Dialog.AddCheckBox( IDC_SAVE_MIPCHAIN_CHECKBOX, L"Save Mipchain", iX, iY += UI_ELEMENT_VERTICAL_SPACING, UI_ELEMENT_WIDTH, 16 );
    g_pLoadSaveUIRegion->m_Dialog.GetCheckBox( IDC_SAVE_MIPCHAIN_CHECKBOX  )->SetChecked(true);
 
@@ -1610,7 +1618,7 @@ void SetupGUI(void)
 	// SL BEGIN
    iY += UI_ELEMENT_VERTICAL_SPACING;
    g_pDisplayUIRegion->m_Dialog.AddCheckBox( IDC_FIX_SEAMS_CHECKBOX, L"FixSeams", iX, iY, 70, 16 );
-   g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_FIX_SEAMS_CHECKBOX )->SetChecked(false);   
+   g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_FIX_SEAMS_CHECKBOX )->SetChecked(false);
    // SL END
 
    g_pDisplayUIRegion->m_Dialog.AddCheckBox( IDC_SKYBOX_CHECKBOX, L"Skybox", iX, iY += UI_ELEMENT_VERTICAL_SPACING - 2, 60, 16 );
@@ -1658,7 +1666,7 @@ void SetupGUI(void)
 
    g_pFilterUIRegion->m_Dialog.AddSlider( IDC_INPUT_CLAMP, iX + 5, iY += 12, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT );
    //scale factor of 0.1 so actual range of slider is from = [1.0, 2.50]
-   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_CLAMP )->SetRange( 0, 500 );   
+   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_CLAMP )->SetRange( 0, 500 );
    g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_CLAMP )->SetValue( 500 );
 
 
@@ -1671,7 +1679,7 @@ void SetupGUI(void)
 
    g_pFilterUIRegion->m_Dialog.AddSlider( IDC_INPUT_DEGAMMA, iX + 5, iY += 12, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT );
    //scale factor of 0.1 so actual range of slider is from = [1.0, 2.50]
-   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->SetRange( 100, 250 );   
+   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->SetRange( 100, 250 );
    g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->SetValue( 100 );
 
    g_pFilterUIRegion->m_Dialog.AddStatic(0, L"Filter Type:", iX, iY += UI_ELEMENT_VERTICAL_SPACING, 100, 16 );
@@ -1754,7 +1762,7 @@ void SetupGUI(void)
 
    g_pFilterUIRegion->m_Dialog.AddSlider( IDC_MIP_INITIAL_FILTER_ANGLE, iX + 5, iY += 12, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT );
    //scale factor of 0.1 so actual range of slider is from = [0.1, 20.0]
-   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_INITIAL_FILTER_ANGLE )->SetRange( 0, 200 );   
+   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_INITIAL_FILTER_ANGLE )->SetRange( 0, 200 );
    g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_INITIAL_FILTER_ANGLE )->SetValue( 10 );
 
    g_pFilterUIRegion->m_Dialog.AddStatic(IDC_MIP_FILTER_ANGLE_SCALE_STATICTEXT, L"Mip Filter Angle Scale:", iX, iY += UI_ELEMENT_VERTICAL_SPACING, 120, 16);
@@ -1766,11 +1774,11 @@ void SetupGUI(void)
 
    g_pFilterUIRegion->m_Dialog.AddSlider( IDC_MIP_FILTER_ANGLE_SCALE, iX + 5, iY += 12, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT );
    //scale factor of 0.01 so actual range is from [1.0, 3.0]
-   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_FILTER_ANGLE_SCALE )->SetRange( 100, 300 );  
+   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_FILTER_ANGLE_SCALE )->SetRange( 100, 300 );
    g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_FILTER_ANGLE_SCALE )->SetValue( 200 );
 
    //edge FIXUP UI elements
-   g_pFilterUIRegion->m_Dialog.AddStatic(IDC_EDGE_FIXUP_WIDTH_STATICTEXT, L"Width (in Texels) = 1", 
+   g_pFilterUIRegion->m_Dialog.AddStatic(IDC_EDGE_FIXUP_WIDTH_STATICTEXT, L"Width (in Texels) = 1",
       iX + 80, iY += UI_ELEMENT_VERTICAL_SPACING, UI_ELEMENT_WIDTH-80, 16);
 
    g_pFilterUIRegion->m_Dialog.AddCheckBox( IDC_EDGE_FIXUP_CHECKBOX, L"Edge Fixup", iX, iY += 10, 80, 16 );
@@ -1880,7 +1888,7 @@ void SetupGUI(void)
    //    g_SampleUI.AddStatic( IDC_INPUT_SCALE_STATICTEXT, L"Input Intensity Scale = 1.000 ( 10^0.000 )", 0, iY += UI_ELEMENT_VERTICAL_SPACING, UI_ELEMENT_WIDTH, 16);
    //    g_SampleUI.AddSlider( IDC_INPUT_SCALE, 0, iY += 12, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT );
    // scale factor of 0.01 so actual exponent range is from = [5.0, 5.0]
-   //    g_SampleUI.GetSlider( IDC_INPUT_SCALE )->SetRange( -500, 500 );   
+   //    g_SampleUI.GetSlider( IDC_INPUT_SCALE )->SetRange( -500, 500 );
    //    g_SampleUI.GetSlider( IDC_INPUT_SCALE )->SetValue( 0 );
 
    //pack miplevel in alpha
@@ -1896,7 +1904,7 @@ void SetupGUI(void)
 
    g_pAdjustOutputUIRegion->m_Dialog.AddSlider( IDC_OUTPUT_SCALE, iX + 5, iY += 12, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT );
    //scale factor of 0.01 so actual exponent range is from = [5.0, 5.0]
-   g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_SCALE )->SetRange( -500, 500 );   
+   g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_SCALE )->SetRange( -500, 500 );
    g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_SCALE )->SetValue( 0 );
 
    g_pAdjustOutputUIRegion->m_Dialog.AddStatic( IDC_OUTPUT_GAMMA_STATICTEXT, L"RGB Output Gamma:", iX, iY += UI_ELEMENT_VERTICAL_SPACING, 120, 16);
@@ -1908,7 +1916,7 @@ void SetupGUI(void)
 
    g_pAdjustOutputUIRegion->m_Dialog.AddSlider( IDC_OUTPUT_GAMMA, iX + 5, iY += 12, UI_ELEMENT_WIDTH, UI_ELEMENT_HEIGHT );
    //scale factor of 0.1 so actual range is from = [0.4, 2.50]
-   g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->SetRange( 100, 250 );   
+   g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->SetRange( 100, 250 );
    g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->SetValue( 100 );
 
    //refresh output cubemap
@@ -1935,7 +1943,7 @@ void AddComboBoxItemIfCapable(CDXUTDialog *pUIDialog, UINT nElementID, const WCH
 {
    D3DCAPS9 deviceCaps;
 
-   IDirect3D9* pD3D = DXUTGetD3DObject(); 
+   IDirect3D9* pD3D = DXUTGetD3DObject();
 
    g_pDevice->GetDeviceCaps(&deviceCaps);
    //D3DPS20CAPS_GRADIENTINSTRUCTIONS
@@ -1959,7 +1967,7 @@ void AddComboBoxItemIfCapable(CDXUTDialog *pUIDialog, UINT nElementID, const WCH
       break;
       case REQUIRES_PS2B:
          if((deviceCaps.PixelShaderVersion < D3DPS_VERSION(2, 0)) ||
-            (deviceCaps.PS20Caps.NumInstructionSlots < 512) ) 
+            (deviceCaps.PS20Caps.NumInstructionSlots < 512) )
          {
             return;
          }
@@ -1973,13 +1981,13 @@ void AddComboBoxItemIfCapable(CDXUTDialog *pUIDialog, UINT nElementID, const WCH
    }
 
    //does it require a depth texture?
-   if(nRequirement & REQUIRES_DEPTH24_TEXTURE) 
+   if(nRequirement & REQUIRES_DEPTH24_TEXTURE)
    {
       if( FAILED(pD3D->CheckDeviceFormat(
          deviceCaps.AdapterOrdinal, // was D3DADAPTER_DEFAULT,
          deviceCaps.DeviceType,     // was D3DDEVTYPE_HAL,
          D3DFMT_X8R8G8B8,
-         D3DUSAGE_DEPTHSTENCIL, 
+         D3DUSAGE_DEPTHSTENCIL,
          D3DRTYPE_TEXTURE,
          D3DFMT_D24X8))
          )
@@ -2009,7 +2017,7 @@ BOOL GetLoadFileName (HWND a_hWnd, LPWSTR a_Filename, LPWSTR a_Filter)
    ofn.lStructSize = sizeof(OPENFILENAME);
    ofn.hwndOwner = a_hWnd;
    ofn.lpstrFile = a_Filename;
-   ofn.nMaxFile = UI_MAX_FILENAME;                                
+   ofn.nMaxFile = UI_MAX_FILENAME;
    ofn.lpstrFilter = a_Filter;  //L"Targa (*.TGA)\0*.TGA\0Windows Bitmap (*.BMP)\0*.BMP\0Portable Network Graphics (*.PNG)\0*.PNG\0Portable Float Map (*.PFM)\0*.PFM\0 All(*.*)\0*.*\0";
    ofn.nFilterIndex = 1;
    ofn.lpstrFileTitle = NULL;
@@ -2023,7 +2031,7 @@ BOOL GetLoadFileName (HWND a_hWnd, LPWSTR a_Filename, LPWSTR a_Filter)
    fileOpenStatus = GetOpenFileName(&ofn);
    _wchdir(dirName);
 
-   // Display the Open dialog box. 
+   // Display the Open dialog box.
    return fileOpenStatus;
 }
 
@@ -2036,10 +2044,10 @@ BOOL GetLoadFileName (HWND a_hWnd, LPWSTR a_Filename, LPWSTR a_Filter)
 BOOL GetSaveFileName(HWND a_hWnd, LPWSTR a_Filename, LPWSTR a_Filter)
 {
    OPENFILENAME ofn = { sizeof(OPENFILENAME), a_hWnd, NULL,
-      a_Filter, NULL, 0, 1, 
-      a_Filename, UI_MAX_FILENAME, NULL, 0, 
-      NULL, L"Save As", NULL, 
-      0, 0, NULL, 
+      a_Filter, NULL, 0, 1,
+      a_Filename, UI_MAX_FILENAME, NULL, 0,
+      NULL, L"Save As", NULL,
+      0, 0, NULL,
       0, NULL, NULL };
    BOOL fileSaveStatus;
    WCHAR dirName[UI_MAX_FILENAME];
@@ -2047,7 +2055,7 @@ BOOL GetSaveFileName(HWND a_hWnd, LPWSTR a_Filename, LPWSTR a_Filter)
    //Get save filename, and maintain current directory
    _wgetcwd(dirName, UI_MAX_FILENAME);
    fileSaveStatus = GetSaveFileName(&ofn);
-   _wchdir(dirName);   
+   _wchdir(dirName);
 
    return fileSaveStatus;
 }
@@ -2068,10 +2076,10 @@ BOOL GetSaveFileName(HWND a_hWnd, LPWSTR a_Filename, LPWSTR a_Filter)
 BOOL GetSaveFileNameExt(HWND a_hWnd, LPWSTR a_Filename, LPWSTR a_Title, LPWSTR a_Filter, int32 *a_FilterIndex)
 {
    OPENFILENAME ofn = { sizeof(OPENFILENAME), a_hWnd, NULL,
-      a_Filter, NULL, 0, 1, 
-      a_Filename, UI_MAX_FILENAME, NULL, 0, 
-      NULL, a_Title, NULL, 
-      0, 0, NULL, 
+      a_Filter, NULL, 0, 1,
+      a_Filename, UI_MAX_FILENAME, NULL, 0,
+      NULL, a_Title, NULL,
+      0, 0, NULL,
       0, NULL, NULL };
    BOOL fileSaveStatus;
    WCHAR dirName[UI_MAX_FILENAME];
@@ -2109,7 +2117,7 @@ void LoadObjectDialog(void )
    }
    else  //other wise use current object filename
    {
-      wcsncpy_s(fileName, UI_MAX_FILENAME, g_CubeGenApp.m_SceneFilename, UI_MAX_FILENAME);    
+      wcsncpy_s(fileName, UI_MAX_FILENAME, g_CubeGenApp.m_SceneFilename, UI_MAX_FILENAME);
    }
 
    _wgetcwd(dirName, UI_MAX_FILENAME);
@@ -2144,7 +2152,7 @@ void LoadCubeMapDialog(void )
    }
    else  //other wise use current object filename
    {
-      wcsncpy_s(fileName, UI_MAX_FILENAME, g_CubeGenApp.m_InputCubeMapFilename, UI_MAX_FILENAME);    
+      wcsncpy_s(fileName, UI_MAX_FILENAME, g_CubeGenApp.m_InputCubeMapFilename, UI_MAX_FILENAME);
    }
 
    _wgetcwd(dirName, UI_MAX_FILENAME);
@@ -2153,10 +2161,10 @@ void LoadCubeMapDialog(void )
       //set hourglass
       SetCursor(LoadCursor(NULL, IDC_WAIT));
 
-      wcscpy_s(g_CubeGenApp.m_InputCubeMapFilename, CG_MAX_FILENAME_LENGTH, fileName );        
+      wcscpy_s(g_CubeGenApp.m_InputCubeMapFilename, CG_MAX_FILENAME_LENGTH, fileName );
       g_CubeGenApp.LoadInputCubeMap();
 
-      g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_INPUT );               
+      g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_INPUT );
       g_CubeGenApp.m_DisplayCubeSource = CG_CUBE_DISPLAY_INPUT;
 
       //set arrow
@@ -2182,12 +2190,12 @@ void LoadBaseMapDialog(void )
    }
    else  //other wise use current object filename
    {
-      wcsncpy_s(fileName, UI_MAX_FILENAME, g_CubeGenApp.m_BaseMapFilename, UI_MAX_FILENAME);    
+      wcsncpy_s(fileName, UI_MAX_FILENAME, g_CubeGenApp.m_BaseMapFilename, UI_MAX_FILENAME);
    }
 
 
    _wgetcwd(dirName, UI_MAX_FILENAME);
-   if( GetLoadFileName( NULL, fileName, 
+   if( GetLoadFileName( NULL, fileName,
           //no comma ensures same string continuation on next line
           //extra spaces inserted to make them appear "lined-up" in UI
           L"All Supported Image Files\0*.hdr;*.bmp;*.jpg;*.pfm;*.ppm;*.png;*.dib;*.tga;*.dds\0"
@@ -2204,7 +2212,7 @@ void LoadBaseMapDialog(void )
       //set hourglass
       SetCursor(LoadCursor(NULL, IDC_WAIT));
 
-      wcscpy_s(g_CubeGenApp.m_BaseMapFilename, CG_MAX_FILENAME_LENGTH, fileName );        
+      wcscpy_s(g_CubeGenApp.m_BaseMapFilename, CG_MAX_FILENAME_LENGTH, fileName );
       g_CubeGenApp.LoadBaseMap();
 
       //set arrow
@@ -2229,7 +2237,7 @@ void LoadCubeCrossDialog(void )
    }
 
    _wgetcwd(dirName, UI_MAX_FILENAME);
-   if(GetLoadFileName(NULL, g_LoadCubeCrossFilename, 
+   if(GetLoadFileName(NULL, g_LoadCubeCrossFilename,
           //no comma ensures same string continuation on next line
           //extra spaces inserted to make them appear "lined-up" in UI
           L"All Supported Image Files\0*.hdr;*.bmp;*.jpg;*.pfm;*.ppm;*.png;*.dib;*.tga;*.dds\0"
@@ -2248,7 +2256,7 @@ void LoadCubeCrossDialog(void )
 
       g_CubeGenApp.LoadInputCubeCross(g_LoadCubeCrossFilename);
 
-      g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_INPUT );               
+      g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_INPUT );
       g_CubeGenApp.m_DisplayCubeSource = CG_CUBE_DISPLAY_INPUT;
 
       //set arrow
@@ -2273,7 +2281,7 @@ void LoadCubeMapFaceDialog(void )
    }
 
    _wgetcwd(dirName, _MAX_PATH);
-   if(GetLoadFileName(NULL, g_LoadCubeFaceFilename, 
+   if(GetLoadFileName(NULL, g_LoadCubeFaceFilename,
           //no comma ensures same string continuation on next line
           //extra spaces inserted to make them appear "lined-up" in UI
           L"All Supported Image Files\0*.hdr;*.bmp;*.jpg;*.pfm;*.ppm;*.png;*.dib;*.tga;*.dds\0"
@@ -2292,7 +2300,7 @@ void LoadCubeMapFaceDialog(void )
 
       g_CubeGenApp.LoadSelectedCubeMapFace(g_LoadCubeFaceFilename);
 
-      g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_INPUT );               
+      g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_INPUT );
       g_CubeGenApp.m_DisplayCubeSource = CG_CUBE_DISPLAY_INPUT;
 
       //set arrow
@@ -2330,7 +2338,7 @@ void SaveCubeMapDialog(void )
 
 
 //--------------------------------------------------------------------------------------
-// Pull up save cubemap dialog, and save each indidual cubemap face for each mip level to 
+// Pull up save cubemap dialog, and save each indidual cubemap face for each mip level to
 //  files
 //--------------------------------------------------------------------------------------
 void SaveCubeMapToImagesDialog(void )
@@ -2339,9 +2347,9 @@ void SaveCubeMapToImagesDialog(void )
    int32 extensionListIdx = 7;
  //  WCHAR fileNamePrefix[_MAX_PATH];
 
-   // note that this extension list matches the list in the enum for 
+   // note that this extension list matches the list in the enum for
    //
-   WCHAR *extensionList= 
+   WCHAR *extensionList=
    {L"BMP:Windows Bitmap (*.bmp)\0*.bmp\0"        //no comma ensures same string continuation on next line
    L"JPG:Joint Photographic Experts Group (*.jpg)\0*.jpg\0"
    L"TGA:Truevision Advanced Raster Graphic (*.tga)\0*.tga\0"
@@ -2376,7 +2384,7 @@ void SaveCubeMapToImagesDialog(void )
    if(GetSaveFileNameExt(NULL, g_SaveCubeFacesPrefix, L"Specify Save Filename Prefix and File Format", extensionList, &extensionListIdx) )
    {
       //extension list IDX is one based rather than zero based so decrement it before using it.
-      extensionListIdx--;      
+      extensionListIdx--;
 
       //set hourglass
       SetCursor(LoadCursor(NULL, IDC_WAIT));
@@ -2401,9 +2409,9 @@ void SaveCubeMapToCrossesDialog(void )
    int32 extensionListIdx = 7;
 //   WCHAR fileNamePrefix[_MAX_PATH];
 
-   // note that this extension list matches the list in the enum for 
+   // note that this extension list matches the list in the enum for
    //
-   WCHAR *extensionList= 
+   WCHAR *extensionList=
    {L"BMP:Windows Bitmap (*.bmp)\0*.bmp\0"        //no comma ensures same string continuation on next line
    L"JPG:Joint Photographic Experts Group (*.jpg)\0*.jpg\0"
    L"TGA:Truevision Advanced Raster Graphic (*.tga)\0*.tga\0"
@@ -2439,7 +2447,7 @@ void SaveCubeMapToCrossesDialog(void )
    if(GetSaveFileNameExt(NULL, g_SaveCubeCrossPrefix, L"Specify Save Filename Prefix and File Format", extensionList, &extensionListIdx) )
    {
       //extension list IDX is one based rather than zero based so decrement it before using it.
-      extensionListIdx--;      
+      extensionListIdx--;
 
       //set hourglass
       SetCursor(LoadCursor(NULL, IDC_WAIT));
@@ -2481,11 +2489,11 @@ void SetLayout(void)
 
 
    //setup eye viewport
-   g_bHasEyeViewport = true;     
-   g_fEyeViewport[0] = 0;      
-   g_fEyeViewport[1] = 0;      
-   g_fEyeViewport[2] = screenSizeW - UI_REGION_WIDTH;      
-   g_fEyeViewport[3] = screenSizeH;  
+   g_bHasEyeViewport = true;
+   g_fEyeViewport[0] = 0;
+   g_fEyeViewport[1] = 0;
+   g_fEyeViewport[2] = screenSizeW - UI_REGION_WIDTH;
+   g_fEyeViewport[3] = screenSizeH;
 
    //always make region at least 1 pixel wide
    if(g_fEyeViewport[2] < 1)
@@ -2502,7 +2510,7 @@ void SetLayout(void)
 
 
 //--------------------------------------------------------------------------------------
-// setup full screen viewport 
+// setup full screen viewport
 //
 //--------------------------------------------------------------------------------------
 void SetFullScreenViewport(void )
@@ -2521,7 +2529,7 @@ void SetFullScreenViewport(void )
 
 
 //--------------------------------------------------------------------------------------
-// setup viewport 
+// setup viewport
 //
 //--------------------------------------------------------------------------------------
 void SetXYWHViewport(int32 *a_ViewportXYWH)
@@ -2540,16 +2548,16 @@ void SetXYWHViewport(int32 *a_ViewportXYWH)
 
 
 //--------------------------------------------------------------------------------------
-// Called during device initialization, this code checks the device for some 
+// Called during device initialization, this code checks the device for some
 // minimum set of capabilities, and rejects those that don't pass by returning false.
 //--------------------------------------------------------------------------------------
-bool CALLBACK IsDeviceAcceptable( D3DCAPS9* pCaps, D3DFORMAT AdapterFormat, 
+bool CALLBACK IsDeviceAcceptable( D3DCAPS9* pCaps, D3DFORMAT AdapterFormat,
                                  D3DFORMAT BackBufferFormat, bool bWindowed )
 {
    // Skip backbuffer formats that don't support alpha blending
-   IDirect3D9* pD3D = DXUTGetD3DObject(); 
+   IDirect3D9* pD3D = DXUTGetD3DObject();
    if( FAILED( pD3D->CheckDeviceFormat( pCaps->AdapterOrdinal, pCaps->DeviceType,
-      AdapterFormat, D3DUSAGE_QUERY_POSTPIXELSHADER_BLENDING, 
+      AdapterFormat, D3DUSAGE_QUERY_POSTPIXELSHADER_BLENDING,
       D3DRTYPE_TEXTURE, BackBufferFormat ) ) )
    {
       return false;
@@ -2560,16 +2568,16 @@ bool CALLBACK IsDeviceAcceptable( D3DCAPS9* pCaps, D3DFORMAT AdapterFormat,
 
 
 //--------------------------------------------------------------------------------------
-// This callback function is called immediately before a device is created to allow the 
-// application to modify the device settings. The supplied pDeviceSettings parameter 
-// contains the settings that the framework has selected for the new device, and the 
-// application can make any desired changes directly to this structure.  Note however that 
-// the sample framework will not correct invalid device settings so care must be taken 
-// to return valid device settings, otherwise IDirect3D9::CreateDevice() will fail.  
+// This callback function is called immediately before a device is created to allow the
+// application to modify the device settings. The supplied pDeviceSettings parameter
+// contains the settings that the framework has selected for the new device, and the
+// application can make any desired changes directly to this structure.  Note however that
+// the sample framework will not correct invalid device settings so care must be taken
+// to return valid device settings, otherwise IDirect3D9::CreateDevice() will fail.
 //--------------------------------------------------------------------------------------
 void CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, const D3DCAPS9* pCaps )
 {
-   // If device doesn't support HW T&L or doesn't support 1.1 vertex shaders in HW 
+   // If device doesn't support HW T&L or doesn't support 1.1 vertex shaders in HW
    // then switch to SWVP.
    if( (pCaps->DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) == 0 ||
       pCaps->VertexShaderVersion < D3DVS_VERSION(1,1) )
@@ -2581,14 +2589,14 @@ void CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, const D
       pDeviceSettings->BehaviorFlags = D3DCREATE_HARDWARE_VERTEXPROCESSING;
    }
 
-   // This application is designed to work on a pure device by not using 
+   // This application is designed to work on a pure device by not using
    // IDirect3D9::Get*() methods, so create a pure device if supported and using HWVP.
-   if ((pCaps->DevCaps & D3DDEVCAPS_PUREDEVICE) != 0 && 
+   if ((pCaps->DevCaps & D3DDEVCAPS_PUREDEVICE) != 0 &&
       (pDeviceSettings->BehaviorFlags & D3DCREATE_HARDWARE_VERTEXPROCESSING) != 0 )
       pDeviceSettings->BehaviorFlags |= D3DCREATE_PUREDEVICE;
 
-   // Debugging vertex shaders requires either REF or software vertex processing 
-   // and debugging pixel shaders requires REF.  
+   // Debugging vertex shaders requires either REF or software vertex processing
+   // and debugging pixel shaders requires REF.
 #ifdef DEBUG_VS
    if( pDeviceSettings->DeviceType != D3DDEVTYPE_REF )
    {
@@ -2607,13 +2615,13 @@ void CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, const D
       pDeviceSettings->DeviceType = D3DDEVTYPE_REF;
    }
 
-   //turn off depth/stencil discard so that current depth-buffer does not get discarded when 
+   //turn off depth/stencil discard so that current depth-buffer does not get discarded when
    // switching render target
    //pDeviceSettings->pp.Flags &= (~D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL);
 
    // Figure out how many quality levels are supported on a nonmaskable multisample buffer
    //DWORD dwQualityLevels;
-   IDirect3D9* pD3D = DXUTGetD3DObject(); 
+   IDirect3D9* pD3D = DXUTGetD3DObject();
    /*
    if( SUCCEEDED( pD3D->CheckDeviceMultiSampleType( pDeviceSettings->AdapterOrdinal,
       pDeviceSettings->DeviceType,
@@ -2629,7 +2637,7 @@ void CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, const D
          pDeviceSettings->pp.MultiSampleType = D3DMULTISAMPLE_NONMASKABLE;
 
          // quality levels are zero-based, so top quality level is n-1
-         pDeviceSettings->pp.MultiSampleQuality = dwQualityLevels-1; 
+         pDeviceSettings->pp.MultiSampleQuality = dwQualityLevels-1;
       }
    }
    */
@@ -2637,11 +2645,11 @@ void CALLBACK ModifyDeviceSettings( DXUTDeviceSettings* pDeviceSettings, const D
 
 
 //--------------------------------------------------------------------------------------
-// This callback function will be called immediately after the Direct3D device has been 
-// created, which will happen during application initialization and windowed/full screen 
-// toggles. This is the best location to create D3DPOOL_MANAGED resources since these 
-// resources need to be reloaded whenever the device is destroyed. Resources created  
-// here should be released in the OnDestroyDevice callback. 
+// This callback function will be called immediately after the Direct3D device has been
+// created, which will happen during application initialization and windowed/full screen
+// toggles. This is the best location to create D3DPOOL_MANAGED resources since these
+// resources need to be reloaded whenever the device is destroyed. Resources created
+// here should be released in the OnDestroyDevice callback.
 //--------------------------------------------------------------------------------------
 HRESULT CALLBACK OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc )
 {
@@ -2653,20 +2661,20 @@ HRESULT CALLBACK OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_
    g_pBackBufferSurfaceDesc = (D3DSURFACE_DESC*)pBackBufferSurfaceDesc;
 
    // Initialize the font
-   V_RETURN( D3DXCreateFont( pd3dDevice, 15, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, 
-      OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, 
+   V_RETURN( D3DXCreateFont( pd3dDevice, 15, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET,
+      OUT_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
       L"Arial", &g_pFont ) );
 
-   // Define DEBUG_VS and/or DEBUG_PS to debug vertex and/or pixel shaders with the 
-   // shader debugger. Debugging vertex shaders requires either REF or software vertex 
-   // processing, and debugging pixel shaders requires REF.  The 
-   // D3DXSHADER_FORCE_*_SOFTWARE_NOOPT flag improves the debug experience in the 
-   // shader debugger.  It enables source level debugging, prevents instruction 
-   // reordering, prevents dead code elimination, and forces the compiler to compile 
-   // against the next higher available software target, which ensures that the 
-   // unoptimized shaders do not exceed the shader model limitations.  Setting these 
-   // flags will cause slower rendering since the shaders will be unoptimized and 
-   // forced into software.  See the DirectX documentation for more information about 
+   // Define DEBUG_VS and/or DEBUG_PS to debug vertex and/or pixel shaders with the
+   // shader debugger. Debugging vertex shaders requires either REF or software vertex
+   // processing, and debugging pixel shaders requires REF.  The
+   // D3DXSHADER_FORCE_*_SOFTWARE_NOOPT flag improves the debug experience in the
+   // shader debugger.  It enables source level debugging, prevents instruction
+   // reordering, prevents dead code elimination, and forces the compiler to compile
+   // against the next higher available software target, which ensures that the
+   // unoptimized shaders do not exceed the shader model limitations.  Setting these
+   // flags will cause slower rendering since the shaders will be unoptimized and
+   // forced into software.  See the DirectX documentation for more information about
    // using the shader debugger.
    DWORD dwShaderFlags = 0;
 #ifdef DEBUG_VS
@@ -2691,13 +2699,13 @@ HRESULT CALLBACK OnCreateDevice( IDirect3DDevice9* pd3dDevice, const D3DSURFACE_
 
 
 //--------------------------------------------------------------------------------------
-// This callback function will be called immediately after the Direct3D device has been 
-// reset, which will happen after a lost device scenario. This is the best location to 
-// create D3DPOOL_DEFAULT resources since these resources need to be reloaded whenever 
-// the device is lost. Resources created here should be released in the OnLostDevice 
-// callback. 
+// This callback function will be called immediately after the Direct3D device has been
+// reset, which will happen after a lost device scenario. This is the best location to
+// create D3DPOOL_DEFAULT resources since these resources need to be reloaded whenever
+// the device is lost. Resources created here should be released in the OnLostDevice
+// callback.
 //--------------------------------------------------------------------------------------
-HRESULT CALLBACK OnResetDevice( IDirect3DDevice9* pd3dDevice, 
+HRESULT CALLBACK OnResetDevice( IDirect3DDevice9* pd3dDevice,
                                const D3DSURFACE_DESC* pBackBufferSurfaceDesc )
 {
    HRESULT hr;
@@ -2733,16 +2741,16 @@ HRESULT CALLBACK OnResetDevice( IDirect3DDevice9* pd3dDevice,
 
 //--------------------------------------------------------------------------------------
 // This callback function will be called once at the beginning of every frame. This is the
-// best location for your application to handle updates to the scene, but is not 
-// intended to contain actual rendering calls, which should instead be placed in the 
-// OnFrameRender callback.  
+// best location for your application to handle updates to the scene, but is not
+// intended to contain actual rendering calls, which should instead be placed in the
+// OnFrameRender callback.
 //--------------------------------------------------------------------------------------
 void CALLBACK OnFrameMove( IDirect3DDevice9* pd3dDevice, double fTime, float fElapsedTime )
 {
    // store device
    g_pDevice = pd3dDevice;
 
-   // Update the camera's position based on user input 
+   // Update the camera's position based on user input
    g_Camera.FrameMove( fElapsedTime );
 }
 
@@ -2778,9 +2786,9 @@ void ClipRectToViewport(D3DRECT *rect, int32 vp[4])
 
 
 //--------------------------------------------------------------------------------------
-// This callback function will be called at the end of every frame to perform all the 
-// rendering calls for the scene, and it will also be called if the window needs to be 
-// repainted. After this function has returned, the sample framework will call 
+// This callback function will be called at the end of every frame to perform all the
+// rendering calls for the scene, and it will also be called if the window needs to be
+// repainted. After this function has returned, the sample framework will call
 // IDirect3DDevice9::Present to display the contents of the next buffer in the swap chain
 //--------------------------------------------------------------------------------------
 void CALLBACK OnFrameRender( IDirect3DDevice9* pd3dDevice, double fTime, float fElapsedTime )
@@ -2794,7 +2802,7 @@ void CALLBACK OnFrameRender( IDirect3DDevice9* pd3dDevice, double fTime, float f
    //Store device
    g_pDevice = pd3dDevice;
 
-   //Clear the render target and the zbuffer 
+   //Clear the render target and the zbuffer
    V( pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0, 15, 0, 30), 1.0f, 0) );
 
    //Render the scene
@@ -2805,13 +2813,13 @@ void CALLBACK OnFrameRender( IDirect3DDevice9* pd3dDevice, double fTime, float f
       float fAspectRatio = (float32)g_pBackBufferSurfaceDesc->Width / (float32)g_pBackBufferSurfaceDesc->Height;
       g_Camera.SetProjParams( g_FOV * (D3DX_PI/180.0f), fAspectRatio, 0.1f, 100000.0f );
       g_Camera.SetWindow( g_pBackBufferSurfaceDesc->Width, g_pBackBufferSurfaceDesc->Height );
-      SetFullScreenViewport();      
+      SetFullScreenViewport();
 
       g_CubeGenApp.SetEyeFrustumProj((D3DXMATRIX *)g_Camera.GetProjMatrix());
       g_CubeGenApp.SetEyeFrustumView((D3DXMATRIX *)g_Camera.GetViewMatrix());
       g_CubeGenApp.SetObjectWorldMatrix((D3DXMATRIX *)g_Camera.GetWorldMatrix());
       g_CubeGenApp.Draw();
-      
+
       //render UI
       SetFullScreenViewport();
 
@@ -2833,14 +2841,14 @@ void CALLBACK OnFrameRender( IDirect3DDevice9* pd3dDevice, double fTime, float f
 
 
 //--------------------------------------------------------------------------------------
-// Render the help and statistics text. This function uses the ID3DXFont interface for 
+// Render the help and statistics text. This function uses the ID3DXFont interface for
 // efficient text rendering.
 //--------------------------------------------------------------------------------------
 void RenderText(void)
-{   
+{
    // The helper object simply helps keep track of text position, and color
    // and then it calls pFont->DrawText( m_pSprite, strMsg, -1, &rc, DT_NOCLIP, m_clr );
-   // If NULL is passed in as the sprite object, then it will work however the 
+   // If NULL is passed in as the sprite object, then it will work however the
    // pFont->DrawText() will not be batched together.  Batching calls will improves performance.
    CDXUTTextHelper txtHelper( g_pFont, g_pTextSprite, 15 );
 
@@ -2878,26 +2886,26 @@ void RenderText(void)
 
    if(g_CubeGenApp.m_bMipLevelSelectEnable == TRUE )
    {  //note that select overrides clamp
-      txtHelper.DrawFormattedTextLine( L"%s (%dx%d): Format %s, Selected MipLevel: %d (FaceSize %dx%d)", 
+      txtHelper.DrawFormattedTextLine( L"%s (%dx%d): Format %s, Selected MipLevel: %d (FaceSize %dx%d)",
          cubeMapName, baseLevelSize, baseLevelSize, formatStr,
          g_CubeGenApp.m_MipLevelDisplayed, currMipLevelSize, currMipLevelSize);
    }
    else if(g_CubeGenApp.m_bMipLevelClampEnable == TRUE )
    {
-      txtHelper.DrawFormattedTextLine( L"%s (%dx%d): Format %s, Max Resolution Clamped to MipLevel: %d (FaceSize %dx%d)", 
+      txtHelper.DrawFormattedTextLine( L"%s (%dx%d): Format %s, Max Resolution Clamped to MipLevel: %d (FaceSize %dx%d)",
          cubeMapName, baseLevelSize, baseLevelSize, formatStr,
-         g_CubeGenApp.m_MipLevelDisplayed, currMipLevelSize, currMipLevelSize);  
+         g_CubeGenApp.m_MipLevelDisplayed, currMipLevelSize, currMipLevelSize);
    }
    else
    {
-      txtHelper.DrawFormattedTextLine( L"%s (%dx%d): Format %s ", 
-         cubeMapName, baseLevelSize, baseLevelSize, formatStr);  
+      txtHelper.DrawFormattedTextLine( L"%s (%dx%d): Format %s ",
+         cubeMapName, baseLevelSize, baseLevelSize, formatStr);
    }
 
 
    //if cubemap processor
    //if(g_CubeGenApp.m_CubeMapProcessor.GetStatus() == CP_STATUS_PROCESSING)
-   //display       
+   //display
    txtHelper.DrawFormattedTextLine( L"%s \n",
       g_CubeGenApp.m_CubeMapProcessor.GetFilterProgressString()
       );
@@ -2933,7 +2941,7 @@ void SetMipSliderRange(void)
    }
    else // (g_CubeGenApp.m_DisplayCubeSource == CG_CUBE_DISPLAY_OUTPUT)
    {
-      g_pDisplayUIRegion->m_Dialog.GetSlider( IDC_MIP_LEVEL )->SetRange(0, (g_CubeGenApp.m_pOutputCubeMap.m_NumMipLevels - 1) );   
+      g_pDisplayUIRegion->m_Dialog.GetSlider( IDC_MIP_LEVEL )->SetRange(0, (g_CubeGenApp.m_pOutputCubeMap.m_NumMipLevels - 1) );
 
       if(g_CubeGenApp.m_MipLevelDisplayed > (g_CubeGenApp.m_pOutputCubeMap.m_NumMipLevels - 1) )
       {
@@ -2947,8 +2955,8 @@ void SetMipSliderRange(void)
 
 
 //--------------------------------------------------------------------------------------
-// Before handling window messages, the sample framework passes incoming windows 
-// messages to the application through this callback function. If the application sets 
+// Before handling window messages, the sample framework passes incoming windows
+// messages to the application through this callback function. If the application sets
 // *pbNoFurtherProcessing to TRUE, then the sample framework will not process this message.
 //--------------------------------------------------------------------------------------
 LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bool* pbNoFurtherProcessing )
@@ -2974,7 +2982,7 @@ LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, bo
 //--------------------------------------------------------------------------------------
 // As a convenience, the sample framework inspects the incoming windows messages for
 // mouse messages and decodes the message parameters to pass relevant mouse
-// messages to the application.  The framework does not remove the underlying mouse 
+// messages to the application.  The framework does not remove the underlying mouse
 // messages, which are still passed to the application's MsgProc callback.
 //--------------------------------------------------------------------------------------
 void CALLBACK MouseProc( bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, int xPos, int yPos )
@@ -2985,20 +2993,20 @@ void CALLBACK MouseProc( bool bLeftButtonDown, bool bRightButtonDown, bool bMidd
 //--------------------------------------------------------------------------------------
 // As a convenience, the sample framework inspects the incoming windows messages for
 // keystroke messages and decodes the message parameters to pass relevant keyboard
-// messages to the application.  The framework does not remove the underlying keystroke 
+// messages to the application.  The framework does not remove the underlying keystroke
 // messages, which are still passed to the application's MsgProc callback.
 //--------------------------------------------------------------------------------------
 void CALLBACK KeyboardProc( UINT nChar, bool bKeyDown, bool bAltDown )
 {
    //no hotkeys if textbox has focus
 
-   if( 
+   if(
        (g_pFilterUIRegion->m_Dialog.GetEditBox( IDC_BASE_FILTER_ANGLE_EDITBOX )->m_bHasFocus) ||
        (g_pFilterUIRegion->m_Dialog.GetEditBox( IDC_MIP_INITIAL_FILTER_ANGLE_EDITBOX )->m_bHasFocus) ||
        (g_pFilterUIRegion->m_Dialog.GetEditBox( IDC_MIP_FILTER_ANGLE_SCALE_EDITBOX )->m_bHasFocus) ||
        (g_pFilterUIRegion->m_Dialog.GetEditBox( IDC_INPUT_DEGAMMA_EDITBOX )->m_bHasFocus) ||
        (g_pAdjustOutputUIRegion->m_Dialog.GetEditBox( IDC_OUTPUT_SCALE_EDITBOX )->m_bHasFocus) ||
-       (g_pAdjustOutputUIRegion->m_Dialog.GetEditBox( IDC_OUTPUT_GAMMA_EDITBOX )->m_bHasFocus) 
+       (g_pAdjustOutputUIRegion->m_Dialog.GetEditBox( IDC_OUTPUT_GAMMA_EDITBOX )->m_bHasFocus)
 	    // SL BEGIN
 		|| (g_pFilterUIRegion->m_Dialog.GetEditBox( IDC_SPECULAR_POWER_EDITBOX )->m_bHasFocus)
 		|| (g_pFilterUIRegion->m_Dialog.GetEditBox( IDC_SPECULAR_POWER_DROP_PER_MIP_EDITBOX )->m_bHasFocus)
@@ -3016,11 +3024,11 @@ void CALLBACK KeyboardProc( UINT nChar, bool bKeyDown, bool bAltDown )
    {
       switch( nChar )
       {
-         case VK_F1: 
-            g_bShowUI = !g_bShowUI; 
+         case VK_F1:
+            g_bShowUI = !g_bShowUI;
          break;
-         case VK_F5:          
-            g_CubeGenApp.InitShaders(); 
+         case VK_F5:
+            g_CubeGenApp.InitShaders();
          break;
          case '0': //VK_1:
             g_pLoadSaveUIRegion->m_Dialog.GetComboBox( IDC_CUBE_FACE_SELECT )->SetSelectedByData( (void *)CG_CUBE_SELECT_NONE );
@@ -3054,13 +3062,13 @@ void CALLBACK KeyboardProc( UINT nChar, bool bKeyDown, bool bAltDown )
             LoadCubeMapFaceDialog();
          break;
          case 'D': //VK_D:
-            g_CubeGenApp.FlipSelectedFaceDiagonal(); 
+            g_CubeGenApp.FlipSelectedFaceDiagonal();
          break;
          case 'V': //VK_V:
-            g_CubeGenApp.FlipSelectedFaceVertical(); 
+            g_CubeGenApp.FlipSelectedFaceVertical();
          break;
          case 'H': //VK_H:
-            g_CubeGenApp.FlipSelectedFaceHorizontal(); 
+            g_CubeGenApp.FlipSelectedFaceHorizontal();
          break;
          case 'I':
             //display input cube map
@@ -3102,9 +3110,9 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
          wcscpy_s( szTitle, 256, L"CubeMapGen v" );
          wcscat_s( szTitle, 256, CMG_VERSION_STR );
          wcscat_s( szTitle, 256, L": Cubemap Filtering and Mipchain Generation Tool\n\n                          AMD GPG Developer Tools\n\n                        gputools.support@amd.com\n" );
-        
-         MessageBoxW(NULL, 
-            szTitle, 
+
+         MessageBoxW(NULL,
+            szTitle,
             L"CubeMapGen", //title
             MB_OK | MB_ICONINFORMATION | MB_TASKMODAL);
          RestoreOldMode();
@@ -3114,26 +3122,26 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       case IDC_TOGGLEREF:        DXUTToggleREF(); break;
       //case IDC_VIEWWHITEPAPER:   DXUTLaunchReadme( DXUTGetHWND() ); break;
       case IDC_CHANGEDEVICE:     DXUTSetShowSettingsDialog( !DXUTGetShowSettingsDialog() ); break;
-      case IDC_RELOAD_SHADERS:   
+      case IDC_RELOAD_SHADERS:
       {
-         g_CubeGenApp.InitShaders(); 
+         g_CubeGenApp.InitShaders();
       }
       break;
-      case IDC_LOAD_BASEMAP:     
+      case IDC_LOAD_BASEMAP:
       {
          StoreCurrentModeThenSetWindowedMode();
-         LoadBaseMapDialog();            
+         LoadBaseMapDialog();
          RestoreOldMode();
       }
       break;
-      case IDC_LOAD_OBJECT:      
+      case IDC_LOAD_OBJECT:
       {
          StoreCurrentModeThenSetWindowedMode();
-         LoadObjectDialog(); 
+         LoadObjectDialog();
          RestoreOldMode();
       }
       break;
-      case IDC_SET_SPHERE_OBJECT:      
+      case IDC_SET_SPHERE_OBJECT:
       {
          swprintf_s(g_CubeGenApp.m_SceneFilename, CG_MAX_FILENAME_LENGTH, L"");
          g_CubeGenApp.LoadObjects();
@@ -3142,7 +3150,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       case IDC_LOAD_CUBEMAP:
       {
          StoreCurrentModeThenSetWindowedMode();
-         LoadCubeMapDialog(); 
+         LoadCubeMapDialog();
          RestoreOldMode();
          SetMipSliderRange();
       }
@@ -3160,10 +3168,10 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
          SetMipSliderRange();
       }
       break;
-      case IDC_LOAD_CUBEMAP_FROM_IMAGES:  
+      case IDC_LOAD_CUBEMAP_FROM_IMAGES:
       {
          StoreCurrentModeThenSetWindowedMode();
-         LoadCubeMapFaceDialog(); 
+         LoadCubeMapFaceDialog();
          RestoreOldMode();
          SetMipSliderRange();
       }
@@ -3182,21 +3190,21 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
           g_CubeGenApp.m_ExportFaceLayout = (int32)pItem->pData;
       }
       break;
-      case IDC_SAVE_CUBEMAP:            
+      case IDC_SAVE_CUBEMAP:
       {
          StoreCurrentModeThenSetWindowedMode();
-         SaveCubeMapDialog(); 
+         SaveCubeMapDialog();
          RestoreOldMode();
       }
       break;
-      case IDC_SAVE_CUBEMAP_TO_IMAGES:  
+      case IDC_SAVE_CUBEMAP_TO_IMAGES:
       {
          StoreCurrentModeThenSetWindowedMode();
-         SaveCubeMapToImagesDialog(); 
+         SaveCubeMapToImagesDialog();
          RestoreOldMode();
       }
       break;
-      case IDC_SAVE_CUBE_CROSS:         
+      case IDC_SAVE_CUBE_CROSS:
       {
          StoreCurrentModeThenSetWindowedMode();
          SaveCubeMapToCrossesDialog();
@@ -3205,7 +3213,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       break;
       case IDC_SAVE_MIPCHAIN_CHECKBOX:
       {
-         g_CubeGenApp.m_bExportMipChain = g_pLoadSaveUIRegion->m_Dialog.GetCheckBox( IDC_SAVE_MIPCHAIN_CHECKBOX )->GetChecked();         
+         g_CubeGenApp.m_bExportMipChain = g_pLoadSaveUIRegion->m_Dialog.GetCheckBox( IDC_SAVE_MIPCHAIN_CHECKBOX )->GetChecked();
       }
       break;
       case IDC_LAYOUT_SELECT:
@@ -3221,27 +3229,27 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
          g_CubeGenApp.m_SelectedCubeFace = (int32)pItem->pData;
       }
       break;
-      case IDC_CUBE_LOAD_FACE: 
-      {    
+      case IDC_CUBE_LOAD_FACE:
+      {
          StoreCurrentModeThenSetWindowedMode();
-         LoadCubeMapFaceDialog(); 
+         LoadCubeMapFaceDialog();
          RestoreOldMode();
          SetMipSliderRange();
       }
       break;
       case IDC_CUBE_FLIP_FACE_UV:
-      {    
-         g_CubeGenApp.FlipSelectedFaceDiagonal(); 
+      {
+         g_CubeGenApp.FlipSelectedFaceDiagonal();
       }
       break;
       case IDC_CUBE_FLIP_FACE_VERTICAL:
-      {    
-         g_CubeGenApp.FlipSelectedFaceVertical(); 
+      {
+         g_CubeGenApp.FlipSelectedFaceVertical();
       }
       break;
       case IDC_CUBE_FLIP_FACE_HORIZONTAL:
-      {    
-         g_CubeGenApp.FlipSelectedFaceHorizontal(); 
+      {
+         g_CubeGenApp.FlipSelectedFaceHorizontal();
       }
       break;
       case IDC_CUBE_SOURCE:
@@ -3260,12 +3268,12 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
          if(g_CubeGenApp.m_bMipLevelSelectEnable == FALSE)
          {
              swprintf_s(staticText, 4096, L"Select Mip Level");
-             g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);                        
+             g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);
          }
          else
          {
              swprintf_s(staticText, 4096, L"Mip Level %2d", g_CubeGenApp.m_MipLevelDisplayed);
-             g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);            
+             g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);
          }
 
 		 // SL BEGIN
@@ -3277,12 +3285,12 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       {
           g_CubeGenApp.m_bMipLevelClampEnable = g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_CLAMP_MIP_CHECKBOX )->GetChecked();
       }
-      break;  
+      break;
       case IDC_SHOW_ALPHA_CHECKBOX:
       {
           g_CubeGenApp.m_bShowAlpha = g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SHOW_ALPHA_CHECKBOX )->GetChecked();
       }
-      break;   
+      break;
       // SL BEGIN
       case IDC_FIX_SEAMS_CHECKBOX:
       {
@@ -3294,21 +3302,21 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       {
           g_CubeGenApp.m_bCenterObject = g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_CENTER_OBJECT )->GetChecked();
       }
-      break;   
+      break;
       case IDC_MIP_LEVEL:
       {
-          g_CubeGenApp.m_MipLevelDisplayed = g_pDisplayUIRegion->m_Dialog.GetSlider( IDC_MIP_LEVEL )->GetValue();            
-          
+          g_CubeGenApp.m_MipLevelDisplayed = g_pDisplayUIRegion->m_Dialog.GetSlider( IDC_MIP_LEVEL )->GetValue();
+
           WCHAR staticText[4096];
           if(g_CubeGenApp.m_bMipLevelSelectEnable == FALSE)
           {
               swprintf_s(staticText, 4096, L"Select Mip Level");
-              g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);                        
+              g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);
           }
           else
           {
               swprintf_s(staticText, 4096, L"Mip Level %2d", g_CubeGenApp.m_MipLevelDisplayed);
-              g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);            
+              g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);
           }
       }
       break;
@@ -3319,7 +3327,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       break;
       case IDC_FOV:
       {
-         g_FOV = g_pDisplayUIRegion->m_Dialog.GetSlider( IDC_FOV )->GetValue();   
+         g_FOV = g_pDisplayUIRegion->m_Dialog.GetSlider( IDC_FOV )->GetValue();
 
       }
       break;
@@ -3350,7 +3358,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       break;
       case IDC_BASE_FILTER_ANGLE:
       {
-          g_CubeGenApp.m_BaseFilterAngle = (float)g_pFilterUIRegion->m_Dialog.GetSlider( IDC_BASE_FILTER_ANGLE )->GetValue();            
+          g_CubeGenApp.m_BaseFilterAngle = (float)g_pFilterUIRegion->m_Dialog.GetSlider( IDC_BASE_FILTER_ANGLE )->GetValue();
 
           WCHAR staticText[4096];
           swprintf_s(staticText, 4096, L"%.2f", (float32)(g_CubeGenApp.m_BaseFilterAngle));
@@ -3358,14 +3366,14 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       }
       break;
       case IDC_BASE_FILTER_ANGLE_EDITBOX:
-      {        
+      {
          g_CubeGenApp.m_BaseFilterAngle = _wtof(g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_BASE_FILTER_ANGLE_EDITBOX)->GetText());
-         g_pFilterUIRegion->m_Dialog.GetSlider( IDC_BASE_FILTER_ANGLE )->SetValue(g_CubeGenApp.m_BaseFilterAngle );            
+         g_pFilterUIRegion->m_Dialog.GetSlider( IDC_BASE_FILTER_ANGLE )->SetValue(g_CubeGenApp.m_BaseFilterAngle );
       }
       break;
       case IDC_MIP_INITIAL_FILTER_ANGLE:
       {
-          g_CubeGenApp.m_MipInitialFilterAngle = (float)0.1f * g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_INITIAL_FILTER_ANGLE )->GetValue();            
+          g_CubeGenApp.m_MipInitialFilterAngle = (float)0.1f * g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_INITIAL_FILTER_ANGLE )->GetValue();
 
           WCHAR staticText[4096];
           swprintf_s(staticText, 4096, L"%.2f", g_CubeGenApp.m_MipInitialFilterAngle);
@@ -3373,14 +3381,14 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       }
       break;
       case IDC_MIP_INITIAL_FILTER_ANGLE_EDITBOX:
-      {        
+      {
          g_CubeGenApp.m_MipInitialFilterAngle = _wtof(g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_MIP_INITIAL_FILTER_ANGLE_EDITBOX)->GetText());
-         g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_INITIAL_FILTER_ANGLE )->SetValue(10 * g_CubeGenApp.m_MipInitialFilterAngle );            
+         g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_INITIAL_FILTER_ANGLE )->SetValue(10 * g_CubeGenApp.m_MipInitialFilterAngle );
       }
       break;
       case IDC_MIP_FILTER_ANGLE_SCALE:
       {
-          g_CubeGenApp.m_MipFilterAngleScale = (float)0.01f * g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_FILTER_ANGLE_SCALE )->GetValue();            
+          g_CubeGenApp.m_MipFilterAngleScale = (float)0.01f * g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_FILTER_ANGLE_SCALE )->GetValue();
 
           WCHAR staticText[4096];
           swprintf_s(staticText, 4096, L"%.2f", g_CubeGenApp.m_MipFilterAngleScale);
@@ -3388,9 +3396,9 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       }
       break;
       case IDC_MIP_FILTER_ANGLE_SCALE_EDITBOX:
-      {        
+      {
          g_CubeGenApp.m_MipFilterAngleScale = _wtof(g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_MIP_FILTER_ANGLE_SCALE_EDITBOX)->GetText());
-         g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_FILTER_ANGLE_SCALE )->SetValue(100 * g_CubeGenApp.m_MipFilterAngleScale );            
+         g_pFilterUIRegion->m_Dialog.GetSlider( IDC_MIP_FILTER_ANGLE_SCALE )->SetValue(100 * g_CubeGenApp.m_MipFilterAngleScale );
       }
       break;
       case IDC_EDGE_FIXUP_TYPE:
@@ -3415,7 +3423,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       break;
       case IDC_OUTPUT_CUBEMAP_SIZE:
       {
-         pItem = ((CDXUTComboBox*)pControl)->GetSelectedItem();            
+         pItem = ((CDXUTComboBox*)pControl)->GetSelectedItem();
          g_CubeGenApp.SetOutputCubeMapSize((int32)pItem->pData);
 
          //set UI to reflect current size (in case GPU does not support new size)
@@ -3425,8 +3433,8 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       break;
       case IDC_OUTPUT_CUBEMAP_FORMAT:
       {
-          pItem = ((CDXUTComboBox*)pControl)->GetSelectedItem();            
-          
+          pItem = ((CDXUTComboBox*)pControl)->GetSelectedItem();
+
           //set hourglass
           SetCursor(LoadCursor(NULL, IDC_WAIT));
           g_CubeGenApp.SetOutputCubeMapTexelFormat((D3DFORMAT)(int32)pItem->pData);
@@ -3471,11 +3479,11 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
 	  break;
       // SL END
       case IDC_INPUT_CLAMP:
-      {        
+      {
           WCHAR staticText[4096];
           float32 clampVal;
 
-          clampVal = 0.01f * (float32)g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_CLAMP )->GetValue();            
+          clampVal = 0.01f * (float32)g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_CLAMP )->GetValue();
 
           swprintf_s(staticText, 4096, L"%7.5g", (float32)pow(10.0f, clampVal) );
           g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_INPUT_CLAMP_EDITBOX)->SetText(staticText);
@@ -3484,7 +3492,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       }
       break;
       case IDC_INPUT_CLAMP_EDITBOX:
-      {        
+      {
           g_CubeGenApp.m_InputMaxClamp = _wtof(g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_INPUT_CLAMP_EDITBOX)->GetText()) ;
           g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_CLAMP )->SetValue(100 * log10(g_CubeGenApp.m_InputMaxClamp));
       }
@@ -3494,7 +3502,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
           WCHAR staticText[4096];
           float32 degamma;
 
-          degamma = 0.01f * (float32)g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->GetValue();            
+          degamma = 0.01f * (float32)g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->GetValue();
 
           swprintf_s(staticText, 4096, L"%5.3f", (float32)degamma );
           g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_INPUT_DEGAMMA_EDITBOX)->SetText(staticText);
@@ -3505,15 +3513,15 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       case IDC_INPUT_DEGAMMA_EDITBOX:
       {
           g_CubeGenApp.m_InputDegamma = _wtof(g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_INPUT_DEGAMMA_EDITBOX)->GetText()) ;
-          g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->SetValue(100 * g_CubeGenApp.m_InputDegamma);            
+          g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->SetValue(100 * g_CubeGenApp.m_InputDegamma);
       }
       break;
       case IDC_OUTPUT_GAMMA:
-      {        
+      {
           WCHAR staticText[4096];
           float32 gamma;
 
-          gamma = 0.01f * (float32)g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->GetValue();            
+          gamma = 0.01f * (float32)g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->GetValue();
 
           swprintf_s(staticText, 4096, L"%5.3f", (float32)gamma );
           g_pAdjustOutputUIRegion->m_Dialog.GetEditBox(IDC_OUTPUT_GAMMA_EDITBOX)->SetText(staticText);
@@ -3522,17 +3530,17 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       }
       break;
       case IDC_OUTPUT_GAMMA_EDITBOX:
-      {        
+      {
           g_CubeGenApp.m_OutputGamma = _wtof(g_pAdjustOutputUIRegion->m_Dialog.GetEditBox(IDC_OUTPUT_GAMMA_EDITBOX)->GetText()) ;
-          g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->SetValue(100 * g_CubeGenApp.m_OutputGamma);            
+          g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->SetValue(100 * g_CubeGenApp.m_OutputGamma);
       }
       break;
       case IDC_OUTPUT_SCALE:
-      {        
+      {
          WCHAR staticText[4096];
          float32 scaleExp;
 
-         scaleExp = 0.01f * (float32)g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_SCALE )->GetValue();            
+         scaleExp = 0.01f * (float32)g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_SCALE )->GetValue();
 
          //swprintf(staticText, L"Output Scale=%7g (10^%5.3f)", (float32)powf(10.0f, scaleExp), (float32)scaleExp );
          if(scaleExp < 0)
@@ -3550,19 +3558,19 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       }
       break;
       case IDC_OUTPUT_SCALE_EDITBOX:
-      {        
+      {
          g_CubeGenApp.m_OutputScaleFactor = _wtof(g_pAdjustOutputUIRegion->m_Dialog.GetEditBox(IDC_OUTPUT_SCALE_EDITBOX)->GetText());
          g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_SCALE )->SetValue(100 * log10(g_CubeGenApp.m_OutputScaleFactor));
       }
       break;
       case IDC_PACK_MIPLEVEL_IN_ALPHA_CHECKBOX:
       {
-          g_CubeGenApp.m_bWriteMipLevelIntoAlpha = g_pAdjustOutputUIRegion->m_Dialog.GetCheckBox( IDC_PACK_MIPLEVEL_IN_ALPHA_CHECKBOX )->GetChecked();      
+          g_CubeGenApp.m_bWriteMipLevelIntoAlpha = g_pAdjustOutputUIRegion->m_Dialog.GetCheckBox( IDC_PACK_MIPLEVEL_IN_ALPHA_CHECKBOX )->GetChecked();
       }
       break;
       case IDC_FILTER_CUBEMAP:
       {
-          g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_OUTPUT );               
+          g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_OUTPUT );
           g_CubeGenApp.m_DisplayCubeSource = CG_CUBE_DISPLAY_OUTPUT;
 
           //set hourglass
@@ -3579,7 +3587,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
           pItem = ((CDXUTComboBox*)pControl)->GetSelectedItem();
           g_CubeGenApp.m_RenderTechnique = (int32)pItem->pData;
       }
-      break; 
+      break;
       case IDC_OUTPUT_PERIODIC_REFRESH_CHECKBOX:
       {
          g_CubeGenApp.m_bOutputPeriodicRefresh = g_pFilterUIRegion->m_Dialog.GetCheckBox( IDC_OUTPUT_PERIODIC_REFRESH_CHECKBOX )->GetChecked();
@@ -3590,7 +3598,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       {
          g_CubeGenApp.m_bUseMultithread = g_pFilterUIRegion->m_Dialog.GetCheckBox( IDC_MULTITHREAD_CHECKBOX )->GetChecked();
       }
-      break;	 
+      break;
 	  case IDC_EXCLUDEBASE_CHECKBOX:
 	  {
 	    g_CubeGenApp.m_bExcludeBase = g_pFilterUIRegion->m_Dialog.GetCheckBox( IDC_EXCLUDEBASE_CHECKBOX )->GetChecked();
@@ -3673,7 +3681,7 @@ void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl )
       case IDC_USE_SOLID_ANGLE_WEIGHTING:
          if ( g_pFilterUIRegion->m_Dialog.GetCheckBox(IDC_OUTPUT_AUTO_REFRESH_CHECKBOX)->GetChecked() )
          {
-            g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_OUTPUT );               
+            g_pDisplayUIRegion->m_Dialog.GetComboBox( IDC_CUBE_SOURCE )->SetSelectedByData( (void *)CG_CUBE_DISPLAY_OUTPUT );
             g_CubeGenApp.m_DisplayCubeSource = CG_CUBE_DISPLAY_OUTPUT;
 
             g_CubeGenApp.FilterCubeMap();
@@ -3719,17 +3727,17 @@ void SetUIElementsUsingCurrentSettings(void)
    // SL BEGIN
    g_pDisplayUIRegion->m_Dialog.GetCheckBox(IDC_FIX_SEAMS_CHECKBOX)->SetEnabled(g_CubeGenApp.m_bMipLevelSelectEnable ? true : false);
    // SL END
-   
+
    if((g_CubeGenApp.m_bMipLevelSelectEnable == TRUE) ||
       (g_CubeGenApp.m_bMipLevelClampEnable == TRUE) )
    {
        swprintf_s(staticText, 4096, L"Mip Level %2d", g_CubeGenApp.m_MipLevelDisplayed);
-       g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);            
+       g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);
    }
    else
    {
        swprintf_s(staticText, 4096, L"Select Mip Level");
-       g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);                        
+       g_pDisplayUIRegion->m_Dialog.GetCheckBox( IDC_SELECT_MIP_CHECKBOX )->SetText(staticText);
    }
 
    g_pDisplayUIRegion->m_Dialog.GetCheckBox(IDC_SHOW_ALPHA_CHECKBOX)->SetChecked(g_CubeGenApp.m_bShowAlpha ? true:false );
@@ -3800,11 +3808,11 @@ void SetUIElementsUsingCurrentSettings(void)
    swprintf_s(staticText, 4096, L"%7.5g", g_CubeGenApp.m_InputMaxClamp );
    g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_INPUT_CLAMP_EDITBOX)->SetText(staticText);
 
-   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->SetValue(100 * g_CubeGenApp.m_InputDegamma);            
+   g_pFilterUIRegion->m_Dialog.GetSlider( IDC_INPUT_DEGAMMA )->SetValue(100 * g_CubeGenApp.m_InputDegamma);
    swprintf_s(staticText, 4096, L"%5.3f", g_CubeGenApp.m_InputDegamma );
    g_pFilterUIRegion->m_Dialog.GetEditBox(IDC_INPUT_DEGAMMA_EDITBOX)->SetText(staticText);
 
-   g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->SetValue(100 * g_CubeGenApp.m_OutputGamma);            
+   g_pAdjustOutputUIRegion->m_Dialog.GetSlider( IDC_OUTPUT_GAMMA )->SetValue(100 * g_CubeGenApp.m_OutputGamma);
    swprintf_s(staticText, 4096, L"%5.3f", g_CubeGenApp.m_OutputGamma );
    g_pAdjustOutputUIRegion->m_Dialog.GetEditBox(IDC_OUTPUT_GAMMA_EDITBOX)->SetText(staticText);
 
@@ -3831,7 +3839,7 @@ void SetUIElementsUsingCurrentSettings(void)
    g_pFilterUIRegion->m_Dialog.GetCheckBox(IDC_MULTITHREAD_CHECKBOX)->SetChecked(g_CubeGenApp.m_bUseMultithread ? true:false );
    g_pFilterUIRegion->m_Dialog.GetCheckBox(IDC_EXCLUDEBASE_CHECKBOX)->SetChecked(g_CubeGenApp.m_bExcludeBase ? true:false );
    g_pFilterUIRegion->m_Dialog.GetComboBox(IDC_COSINEPOWER_CHAIN_TYPE)->SetSelectedByData((void *)g_CubeGenApp.m_CosinePowerMipmapChainMode );
-   g_pFilterUIRegion->m_Dialog.GetCheckBox(IDC_IRRADIANCE_CUBEMAP_CHECKBOX)->SetChecked(g_CubeGenApp.m_bIrradianceCubemap ? true:false );      
+   g_pFilterUIRegion->m_Dialog.GetCheckBox(IDC_IRRADIANCE_CUBEMAP_CHECKBOX)->SetChecked(g_CubeGenApp.m_bIrradianceCubemap ? true:false );
    g_pFilterUIRegion->m_Dialog.GetComboBox(IDC_LIGHTINGMODEL_TYPE)->SetSelectedByData((void *)g_CubeGenApp.m_LightingModel );
    // SL END
 }
@@ -3843,10 +3851,10 @@ void SetUIElementsUsingCurrentSettings(void)
 
 
 //--------------------------------------------------------------------------------------
-// This callback function will be called immediately after the Direct3D device has 
+// This callback function will be called immediately after the Direct3D device has
 // entered a lost state and before IDirect3DDevice9::Reset is called. Resources created
-// in the OnResetDevice callback should be released here, which generally includes all 
-// D3DPOOL_DEFAULT resources. See the "Lost Devices" section of the documentation for 
+// in the OnResetDevice callback should be released here, which generally includes all
+// D3DPOOL_DEFAULT resources. See the "Lost Devices" section of the documentation for
 // information about lost devices.
 //--------------------------------------------------------------------------------------
 void CALLBACK OnLostDevice()
@@ -3861,10 +3869,10 @@ void CALLBACK OnLostDevice()
 
 
 //--------------------------------------------------------------------------------------
-// This callback function will be called immediately after the Direct3D device has 
-// been destroyed, which generally happens as a result of application termination or 
-// windowed/full screen toggles. Resources created in the OnCreateDevice callback 
-// should be released here, which generally includes all D3DPOOL_MANAGED resources. 
+// This callback function will be called immediately after the Direct3D device has
+// been destroyed, which generally happens as a result of application termination or
+// windowed/full screen toggles. Resources created in the OnCreateDevice callback
+// should be released here, which generally includes all D3DPOOL_MANAGED resources.
 //--------------------------------------------------------------------------------------
 void CALLBACK OnDestroyDevice()
 {
