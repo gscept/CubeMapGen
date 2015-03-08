@@ -466,7 +466,7 @@ public:
    // Initializes cube map processor class
    //
    // a_InputSize    [in]     Size of the input cubemap
-   // a_OutputSize   [in]     Size of the input cubemap
+   // a_OutputSize   [in]     Size of the output cubemap
    // a_NumMipLevels [in]     Number of miplevels in the output cubemap
    // a_NumChannels  [in]     Number of color channels (internally) in the input and output cubemap
    //==========================================================================================================
