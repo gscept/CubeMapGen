@@ -13,8 +13,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <assert.h>
-#include <windows.h>
-
+#include <thread>
+#include <future>
 #include "Types.h"
 #include "VectorMacros.h"
 #include "CBBoxInt32.h"
@@ -27,12 +27,6 @@
 #ifdef CG_HDR_FILE_SUPPORT
 #include "HDRWrite.h"
 #endif //CG_HDR_FILE_SUPPORT
-
-
-#ifndef WCHAR 
-#define WCHAR wchar_t
-#endif //WCHAR 
-
 
 //used to index cube faces
 #define CP_FACE_X_POS 0
@@ -83,7 +77,7 @@
 // and should only be used for STILL_ACTIVE
 #define CP_THREAD_COMPLETED       0
 #define CP_THREAD_TERMINATED     15
-#define CP_THREAD_STILL_ACTIVE   STILL_ACTIVE
+#define CP_THREAD_STILL_ACTIVE   259
 
 #define CP_MAX_PROGRESS_STRING 4096
 
@@ -204,8 +198,7 @@ struct SThreadFilterFace
 	int32			m_filterSize;
 	int32			m_FixupType;
 
-	HANDLE			m_ThreadHandle;
-	DWORD			m_ThreadID;
+	std::future<unsigned long>        m_Future;	
 	SFilterProgress	m_ThreadProgress;
 	bool8			m_bUseSolidAngle;
 	bool8			m_bThreadInitialized;
@@ -269,9 +262,9 @@ public:
    // SL BEGIN
    // Suppose only one CCubeMapProcessor at a time
    static SThreadFilterFace* sg_ThreadFilterFace;
-   HANDLE DumbThreadHandle; // thread id of the main thread when in multithread mode
+   std::thread DumbThreadHandle; // thread id of the main thread when in multithread mode
    // SL END
-   WCHAR             m_ProgressString[CP_MAX_PROGRESS_STRING];
+   char             m_ProgressString[CP_MAX_PROGRESS_STRING];
 
    //filtering parameters last used for filtering
    float32           m_BaseFilterAngle;
@@ -654,7 +647,7 @@ public:
    // Gets the current filtering progress string 
    //
    //==========================================================================================================
-   WCHAR *GetFilterProgressString(void);
+   const char *GetFilterProgressString(void);
 
 
    //==========================================================================================================

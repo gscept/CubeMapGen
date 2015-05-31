@@ -10,11 +10,13 @@
 #ifndef ERRORMSG_H
 #define ERRORMSG_H 
 
-//#include "LocalDXUT\\dxstdafx.h"
+#ifdef _WIN32
 #include <windows.h>
-#include <stdio.h>
 #include <wtypes.h>
+#endif
+#include <stdio.h>
 #include <stdarg.h>
+#include "Types.h"
 
 //do not allow "dxstdafx.h" to depricate any core string functions
 #pragma warning( disable : 4995 )
@@ -33,41 +35,41 @@
 #define EM_DEFAULT_MESSAGE_MEDIUM  EM_MESSAGE_MEDIUM_MESSAGEBOX
 
 //default error message callback
-void DefaultErrorMessageCallback(WCHAR *a_Title, WCHAR *a_Message );
+void DefaultErrorMessageCallback(const char *a_Title, const char *a_Message );
 
 //set error function
-void SetErrorMessageCallback( void(*a_MessageOutputFunc)(WCHAR *, WCHAR *) );
+void SetErrorMessageCallback( void(*a_MessageOutputFunc)(const char *,const char *) );
 
 
 #if defined(DEBUG) | defined(_DEBUG)
     #ifndef V_MSG
-        #define V_MSG(x, m) {hr = x; if( FAILED(hr) ){OutputMessage(L"Warning", m ); {DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true );} }}
+        #define V_MSG(x, m) {hr = x; if( FAILED(hr) ){OutputMessage("Warning", m ); {DXUTTrace( __FILE__, (DWORD)__LINE__, hr, #x, true );} }}
         #endif
     #ifndef V_MSG_RETURN
-        #define V_MSG_RETURN(x, m) {hr = x; if( FAILED(hr) ){OutputMessage(L"Warning", m); {return DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); }}
+        #define V_MSG_RETURN(x, m) {hr = x; if( FAILED(hr) ){OutputMessage("Warning", m); {return DXUTTrace( __FILE__, (DWORD)__LINE__, hr, #x, true ); }}
     #endif
     #ifndef V_MSG_FATAL
-        #define V_MSG_FATAL(x, m) {hr = x; if(FAILED(hr)) {OutputMessage(L"Fatal Error", m); {DXUTTrace( __FILE__, (DWORD)__LINE__, hr, L#x, true ); exit(EM_FATAL_ERROR); }}
+        #define V_MSG_FATAL(x, m) {hr = x; if(FAILED(hr)) {OutputMessage("Fatal Error", m); {DXUTTrace( __FILE__, (DWORD)__LINE__, hr, #x, true ); exit(EM_FATAL_ERROR); }}
     #endif
 #else
     #ifndef V_MSG
-        #define V_MSG(x, m) {hr = x; if(FAILED(hr)) {OutputMessage(L"Warning", m); } }
+        #define V_MSG(x, m) {hr = x; if(FAILED(hr)) {OutputMessage("Warning", m); } }
     #endif
     #ifndef V_MSG_RETURN
-        #define V_MSG_RETURN(x, m) {hr = x; if(FAILED(hr)) {OutputMessage(L"Warning", m);} } 
+        #define V_MSG_RETURN(x, m) {hr = x; if(FAILED(hr)) {OutputMessage("Warning", m);} } 
     #endif
     #ifndef V_MSG_FATAL
-        #define V_MSG_FATAL(x, m) {hr = x; if(FAILED(hr)) {OutputMessage(L"Fatal Error", m); exit(EM_FATAL_ERROR);} }
+        #define V_MSG_FATAL(x, m) {hr = x; if(FAILED(hr)) {OutputMessage("Fatal Error", m); exit(EM_FATAL_ERROR);} }
     #endif
 #endif
 
 //no variable arguementlist
-void OutputMessageString(WCHAR *a_Title, WCHAR *a_Message);
+void OutputMessageString(const char *a_Title, const char *a_Message);
 
 //has variable arguement list
-void OutputMessage(WCHAR *a_Message, ... );
-bool OutputQuestion( WCHAR *a_Message, ... );
-HRESULT OutputMessageOnFail(HRESULT a_hr, WCHAR *a_Message, ... );
-HRESULT OutputFatalMessageOnFail(HRESULT a_hr, WCHAR *a_Message, ... );
+void OutputMessage(const char *a_Message, ... );
+bool OutputQuestion( const char *a_Message, ... );
+HRESULT OutputMessageOnFail(HRESULT a_hr, const char *a_Message, ... );
+HRESULT OutputFatalMessageOnFail(HRESULT a_hr, const char *a_Message, ... );
 
 #endif //ERRORMSG_H 

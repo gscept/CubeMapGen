@@ -64,7 +64,7 @@ public:
 
 private:
    //fatal error
-   void FatalError(WCHAR *a_Msg);
+   void FatalError(char *a_Msg);
 
 public:
    CImageSurface(void);
@@ -89,7 +89,7 @@ public:
    void ClearChannelConst(int32 a_ChannelIdx, CP_ITYPE a_ClearColor);
 
 #ifdef CG_HDR_FILE_SUPPORT
-   void WriteHDRFile(WCHAR *a_FileName );
+   void WriteHDRFile(char *a_FileName );
 #endif //CG_HDR_FILE_SUPPORT
 
    //various image operations that can be performed on the CImageSurface
