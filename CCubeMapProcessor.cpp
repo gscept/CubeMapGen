@@ -2617,10 +2617,10 @@ void CCubeMapProcessor::EstimateFilterThreadProgress(SFilterProgress *a_FilterPr
 // Return string describing the current status of the cubemap processing threads
 //
 //--------------------------------------------------------------------------------------
-WCHAR *CCubeMapProcessor::GetFilterProgressString(void)
+const char *CCubeMapProcessor::GetFilterProgressString(void)
 {
    // SL BEGIN
-   static WCHAR threadProgressString[CP_MAX_PROGRESS_STRING];
+   static char threadProgressString[CP_MAX_PROGRESS_STRING];
 
    m_ProgressString[0] = '\0';
 
@@ -2633,10 +2633,10 @@ WCHAR *CCubeMapProcessor::GetFilterProgressString(void)
 
          EstimateFilterThreadProgress(&sg_ThreadFilterFace[i].m_ThreadProgress);
 
-         _snwprintf_s(threadProgressString,
+         _snprintf_s(threadProgressString,
             CP_MAX_PROGRESS_STRING,
             CP_MAX_PROGRESS_STRING,
-            L"Thread %d: %5.2f%% Complete (Level %3d, Face %3d, Row %3d)\n", 
+            "Thread %d: %5.2f%% Complete (Level %3d, Face %3d, Row %3d)\n", 
 			i,
             100.0f * sg_ThreadFilterFace[i].m_ThreadProgress.m_FractionCompleted,
             sg_ThreadFilterFace[i].m_ThreadProgress.m_CurrentMipLevel, 
@@ -2649,13 +2649,13 @@ WCHAR *CCubeMapProcessor::GetFilterProgressString(void)
          //set arrow
          SetCursor(LoadCursor(NULL, IDC_ARROW ));
 
-		 _snwprintf_s(threadProgressString, 
+		 _snprintf_s(threadProgressString, 
             CP_MAX_PROGRESS_STRING,
             CP_MAX_PROGRESS_STRING,
-            L"Thread %d: Ready\n", i);   
+            "Thread %d: Ready\n", i);   
       }
 
-	  wcscat_s(m_ProgressString, CP_MAX_PROGRESS_STRING, threadProgressString);
+	  strcat_s(m_ProgressString, CP_MAX_PROGRESS_STRING, threadProgressString);
    }
    // SL END
 

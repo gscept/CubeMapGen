@@ -271,7 +271,7 @@ public:
    static SThreadFilterFace* sg_ThreadFilterFace;
    HANDLE DumbThreadHandle; // thread id of the main thread when in multithread mode
    // SL END
-   WCHAR             m_ProgressString[CP_MAX_PROGRESS_STRING];
+   char             m_ProgressString[CP_MAX_PROGRESS_STRING];
 
    //filtering parameters last used for filtering
    float32           m_BaseFilterAngle;
@@ -654,7 +654,7 @@ public:
    // Gets the current filtering progress string 
    //
    //==========================================================================================================
-   WCHAR *GetFilterProgressString(void);
+   const char *GetFilterProgressString(void);
 
 
    //==========================================================================================================
