@@ -7,7 +7,7 @@
 //--------------------------------------------------------------------------------------
 
 #include "CImageSurface.h"
-
+#include "Types.h"
 
 
 
@@ -224,11 +224,14 @@ void CPTypeSetVal(CP_ITYPE a_Val, int32 a_Type, void *a_Ptr)
 //Error handling for imagesurface class
 //  Pop up dialog box, and terminate application
 //--------------------------------------------------------------------------------------
-void CImageSurface::FatalError(WCHAR *a_Msg)
+void CImageSurface::FatalError(char *a_Msg)
 {
    //MessageBoxW(NULL, a_Msg, L"Error: Application Terminating", MB_OK);
-
-   OutputMessageString(L"CImageSurface Error: Application Terminating", a_Msg);
+#ifdef WIN32
+   OutputMessageString("CImageSurface Error: Application Terminating", a_Msg);
+#else
+   fprintf(stderr,"CImageSurface Error: Application Terminating\n%s\n", a_Msg);
+#endif
    exit(EM_FATAL_ERROR);
 
 }
@@ -276,7 +279,7 @@ void CImageSurface::Init(int32 a_Width, int32 a_Height, int32 a_NumChannels )
    }
    catch ( ... )
    {
-      FatalError(L"Unable to allocate data for image in CImageSurface::Init.");
+      FatalError("Unable to allocate data for image in CImageSurface::Init.");
       m_ImgData = NULL;
    }
 }
@@ -680,28 +683,29 @@ void CImageSurface::InPlaceDiagonalUVFlip(void)
 //--------------------------------------------------------------------------------------
 // Write radiance .HDR File
 //--------------------------------------------------------------------------------------
-void CImageSurface::WriteHDRFile(WCHAR *a_FileName )
+void CImageSurface::WriteHDRFile(char *a_FileName )
 {
    FILE *ofp;
-   WCHAR outMsg[4096];
+   char outMsg[4096];
 
    if(m_NumChannels != 3)
    {    
-      FatalError(L"CImageSurface::WriteHDRFile: only works for 3 channel CImageSurfaces.");
+      FatalError("CImageSurface::WriteHDRFile: only works for 3 channel CImageSurfaces.");
       return;
    }
 
    if(sizeof(CP_ITYPE) != 4)
    {    
-      FatalError(L"CImageSurface::WriteHDRFile: requires internal data format CP_ITYPE to be float32");
+      FatalError("CImageSurface::WriteHDRFile: requires internal data format CP_ITYPE to be float32");
       return;
    }
 
-   errno_t res = _wfopen_s( &ofp, a_FileName, L"wb");
+   ofp = fopen(a_FileName, "wb");
 
-   if( res != 0 )
+   if( ofp == 0 )
    {    
-      _snwprintf_s(outMsg, 4096, 4096, L"CImageSurface::WriteHDRFile: Can't open file %s for writing out RGBE image!", a_FileName);
+       
+      snprintf(outMsg, 4096, "CImageSurface::WriteHDRFile: Can't open file %s for writing out RGBE image!", a_FileName);
       FatalError(outMsg);
       return;
    }

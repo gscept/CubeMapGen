@@ -10,6 +10,10 @@
 
 static char sgCopyrightString[] = "\r\n\r\n(C) 2004 ATI Research, Inc.\r\n\r\n";
 
+#ifndef WIN32
+#include <inttypes.h>
+#endif
+
 // DEFINES ===============================================================================================================================================
 #ifdef TRUE
  #undef TRUE
@@ -20,6 +24,19 @@ static char sgCopyrightString[] = "\r\n\r\n(C) 2004 ATI Research, Inc.\r\n\r\n";
  #undef FALSE
 #endif
 #define FALSE 0
+#ifdef _WIN32
+#define snprintf _snprintf
+#else
+#include <unistd.h>
+#include <stdlib.h>
+#define Sleep usleep   
+#define HRESULT int
+#define FAILED(x) ((x)!=0)
+#define MessageBox(dummy, text, caption, dummy2) fprintf(stderr, "Message:\n%s\n%s", text, caption)
+#define WINAPI
+#define max std::max
+#define min std::min
+#endif
 
    //=========//
    // Windows //
@@ -31,7 +48,7 @@ static char sgCopyrightString[] = "\r\n\r\n(C) 2004 ATI Research, Inc.\r\n\r\n";
    typedef char    int8;
    typedef short   int16;
    typedef int     int32;
-   typedef __int64 int64;
+   typedef long long int64;
 
    typedef float       float32;
    typedef double      float64;
@@ -41,10 +58,12 @@ static char sgCopyrightString[] = "\r\n\r\n(C) 2004 ATI Research, Inc.\r\n\r\n";
    typedef unsigned char    uint8;
    typedef unsigned short   uint16;
    typedef unsigned int     uint32;
-   typedef unsigned __int64 uint64;
+   typedef unsigned long long uint64;
    
    //String
    typedef const char cstr;
+
+
    
 
 #endif

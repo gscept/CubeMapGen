@@ -17,8 +17,11 @@ SET(HEAD CBBoxInt32.h
 		  VectorMacros.h)
 		  
 		  
-add_definitions(-DUNICODE -D_UNICODE)
-set(CMAKE_CXX_FLAGS /EHsc)
+IF(WIN32)
+    set(CMAKE_CXX_FLAGS /EHsc)
+ELSE()
+    SET(CMAKE_CXX_FLAGS -std=c++11)
+ENDIF()
 SOURCE_GROUP("CubeMapGen" FILES ${SRC} ${HEAD})
 LIST(APPEND CODE ${SRC} ${HEAD})
 

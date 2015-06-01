@@ -7,6 +7,7 @@
 // (C) 2005 ATI Research, Inc., All rights reserved.
 //--------------------------------------------------------------------------------------
 #include "CCubeMapProcessor.h"
+#include <string.h>
 
 #define CP_PI   3.14159265358979323846
 
@@ -16,7 +17,7 @@ SThreadOptionsThread0 sg_FilterOptionsCPU0;
 //Thread functions used to run filtering routines in the CPU0 process
 // note that these functions can not be member functions since thread initiation
 // must start from a global or static global function
-DWORD WINAPI ThreadProcCPU0Filter(LPVOID a_NothingToPassToThisFunction)
+unsigned long WINAPI ThreadProcCPU0Filter()
 {   
    //filter cube map mipchain
    sg_FilterOptionsCPU0.m_cmProc->FilterCubeMapMipChain(
@@ -38,7 +39,7 @@ DWORD WINAPI ThreadProcCPU0Filter(LPVOID a_NothingToPassToThisFunction)
 }
 
 // SL BEGIN
-DWORD WINAPI ThreadProcCPU0FilterMultithread(LPVOID a_NothingToPassToThisFunction)
+unsigned long WINAPI ThreadProcCPU0FilterMultithread()
 {   
 
    //filter cube map mipchain
@@ -65,7 +66,7 @@ SThreadOptionsThread1 sg_FilterOptionsCPU1;
 
 //This thread entry point function is called by thread 1  which is initiated
 // by thread 0
-DWORD WINAPI ThreadProcCPU1Filter(LPVOID a_NothingToPassToThisFunction)
+unsigned long WINAPI ThreadProcCPU1Filter()
 {   
    //filter subset of faces 
    sg_FilterOptionsCPU1.m_cmProc->FilterCubeSurfaces(
@@ -223,9 +224,9 @@ int32 sg_CubeCornerList[6][4] = {
 //Error handling for cube map processor
 //  Pop up dialog box, and terminate application
 //--------------------------------------------------------------------------------------
-void CPFatalError(WCHAR *a_Msg)
+void CPFatalError(const char *a_Msg)
 {
-   MessageBoxW(NULL, a_Msg, L"Error: Application Terminating", MB_OK);
+   MessageBox(NULL, a_Msg, "Error: Application Terminating", MB_OK);
    exit(EM_FATAL_ERROR);
 }
 
@@ -1487,12 +1488,16 @@ CCubeMapProcessor::CCubeMapProcessor(void)
 {
    // SL BEGIN
    // Get CPU info.
+#ifdef WIN32
    SYSTEM_INFO SI;
    GetSystemInfo(&SI);
-   // TODO : In case of command line, we want to use all hardware thread available
+   // TODO : In case of command line, we want to use all hardware thread available   
    m_NumFilterThreads  = SI.dwNumberOfProcessors - 1;	// - 1 cause the main core is used for the application.
-														// If no extra hardware thread is available the filering will be done the main process.
+       // If no extra hardware thread is available the filering will be done the main process.
    m_NumFilterThreads = max(min(m_NumFilterThreads, 6), 0); // We don't handle more than 6 hardware thread (6 face of cubemap) for now
+#else    
+    m_NumFilterThreads = std::thread::hardware_concurrency();
+#endif
    sg_ThreadFilterFace = new SThreadFilterFace[m_NumFilterThreads];
 
    //clear all threads
@@ -1577,24 +1582,23 @@ void CCubeMapProcessor::Clear(void)
 void CCubeMapProcessor::TerminateActiveThreads(void)
 {
    int32 i;
-
    // SL BEGIN
    for(i=0; i<m_NumFilterThreads; i++)
    {
       if(sg_ThreadFilterFace[i].m_bThreadInitialized == TRUE)
       {
-         if(sg_ThreadFilterFace[i].m_ThreadHandle != NULL)
+         if(sg_ThreadFilterFace[i].m_Future.valid())
          {
-            TerminateThread(sg_ThreadFilterFace[i].m_ThreadHandle, CP_THREAD_TERMINATED);
-            CloseHandle(sg_ThreadFilterFace[i].m_ThreadHandle);
-            sg_ThreadFilterFace[i].m_ThreadHandle = NULL;
+			 sg_ThreadFilterFace[i].m_Future.get();
          }
       }
    }
 
    // Terminate main thread if needed
-   TerminateThread(DumbThreadHandle, CP_THREAD_TERMINATED);
-   
+   if (DumbThreadHandle.joinable())
+   {
+	   DumbThreadHandle.join();
+   }   
    m_Status = CP_STATUS_FILTER_TERMINATED;
    // SL END
 
@@ -1868,14 +1872,7 @@ void CCubeMapProcessor::FilterCubeMapMipChain(float32 a_BaseFilterAngle, float32
 {
    int32 i;
    float32 coneAngle;
-   SECURITY_ATTRIBUTES secAttr;
-
-   //thread security attributes for thread1
-   secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-   secAttr.lpSecurityDescriptor = NULL;            //use same security descriptor as parent
-   secAttr.bInheritHandle = TRUE;                  //handle is inherited by new processes spawning from this one
-
-
+  
    //Build filter lookup tables based on the source miplevel size
    // SL BEGIN
    PrecomputeFilterLookupTables(a_FilterType, m_InputSurface[0].m_Width, a_BaseFilterAngle, a_MCO.FixupType);
@@ -1940,16 +1937,8 @@ void CCubeMapProcessor::FilterCubeMapMipChain(float32 a_BaseFilterAngle, float32
 		  sg_ThreadFilterFace[1].m_ThreadProgress.m_CurrentRow = 0;
 
 		  //start thread 1
-		  sg_ThreadFilterFace[1].m_ThreadHandle = CreateThread(
-    		 &secAttr,                     //security attributes
-			 0,                            //0 is sentinel for use default stack size
-			 ThreadProcCPU1Filter,         //LPTHREAD_START_ROUTINE
-			 (LPVOID)NULL,                 // pass nothing into function
-			 NULL,                         // no creation flags (run thread immediately)
-			 &sg_ThreadFilterFace[1].m_ThreadID );
-		  // SL END
-
-
+                  sg_ThreadFilterFace[1].m_Future = std::async(std::launch::async, ThreadProcCPU1Filter);
+		  
 		  //Filter the top mip level (initial filtering used for diffuse or blurred specular lighting )
 		  FilterCubeSurfaces(m_InputSurface, m_OutputSurface[0], a_BaseFilterAngle, a_FilterType, a_bUseSolidAngle, 
 			 0,  //start at face 0 
@@ -2250,12 +2239,7 @@ void CCubeMapProcessor::InitiateFiltering(float32 a_BaseFilterAngle, float32 a_I
 	MCO.GlossBias					= a_GlossBias;
 	// SL END
 
-   SECURITY_ATTRIBUTES secAttr;
-
-   secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-   secAttr.lpSecurityDescriptor = NULL;            //use same security descriptor as parent
-   secAttr.bInheritHandle = TRUE;                  //handle is inherited by new processes spawning from this one
-
+   
    //set filtering options in main class to determine 
    m_BaseFilterAngle = a_BaseFilterAngle;
    m_InitialMipAngle = a_InitialMipAngle;
@@ -2297,24 +2281,12 @@ void CCubeMapProcessor::InitiateFiltering(float32 a_BaseFilterAngle, float32 a_I
 		  // we create a thread which only purpose is to launch other thread to process cubemap face.
 		  // So this "dumb" thread is not handled as the other.
 		  sg_ThreadFilterFace[0].m_bThreadInitialized = FALSE;
-		  DWORD DumbThreadID;
-		  DumbThreadHandle = CreateThread(
-				 &secAttr,                     //security attributes
-				 0,                            //0 is sentinel for use default stack size
-				 ThreadProcCPU0FilterMultithread, //LPTHREAD_START_ROUTINE
-				 (LPVOID)NULL,                 // pass nothing into function
-				 NULL,                         // no creation flags (run thread immediately)
-				 &DumbThreadID );
+		  std::thread dummy(ThreadProcCPU0FilterMultithread);
+		  DumbThreadHandle = std::move(dummy);
 	  }
 	  else
 	  {
-		  sg_ThreadFilterFace[0].m_ThreadHandle = CreateThread(
-			 &secAttr,                     //security attributes
-			 0,                            //0 is sentinel for use default stack size
-			 ThreadProcCPU0Filter,         //LPTHREAD_START_ROUTINE
-			 (LPVOID)NULL,                 // pass nothing into function
-			 NULL,                         // no creation flags (run thread immediately)
-			 &sg_ThreadFilterFace[0].m_ThreadID );
+		  sg_ThreadFilterFace[0].m_Future = std::async(std::launch::async, ThreadProcCPU0Filter);			 
 	  }
 	  // SL END
    }
@@ -2461,26 +2433,23 @@ void CCubeMapProcessor::FlipOutputCubemapFaces(void)
 //--------------------------------------------------------------------------------------
 bool8 CCubeMapProcessor::IsFilterThreadActive(uint32 a_ThreadIdx)
 {
-	// SL BEGIN
-   if( (sg_ThreadFilterFace[a_ThreadIdx].m_bThreadInitialized == FALSE) ||
-       (sg_ThreadFilterFace[a_ThreadIdx].m_ThreadHandle == NULL) 
-       )
+   if( (sg_ThreadFilterFace[a_ThreadIdx].m_bThreadInitialized == FALSE))
    {
       return FALSE;
    }
    else 
    {  //thread is initialized
-      DWORD exitCode;
-
-      GetExitCodeThread(sg_ThreadFilterFace[a_ThreadIdx].m_ThreadHandle, &exitCode );
-
-      if( exitCode == CP_THREAD_STILL_ACTIVE )
-      {
-         return TRUE;
-      }
-   }
-   // SL END
-   
+      unsigned long exitCode;
+	  if (sg_ThreadFilterFace[a_ThreadIdx].m_Future.wait_for(std::chrono::milliseconds(1)) == std::future_status::ready)
+	  {
+		  unsigned long ret = sg_ThreadFilterFace[a_ThreadIdx].m_Future.get();
+		  return false;
+	  }
+	  else
+	  {
+		  return true;
+	  }      
+   }      
    return FALSE;
 }
 
@@ -2628,13 +2597,14 @@ const char *CCubeMapProcessor::GetFilterProgressString(void)
    {
       if(IsFilterThreadActive(i))
       {
+#ifdef WIN32
          //set wait
          SetCursor(LoadCursor(NULL, IDC_WAIT ));
+#endif
 
          EstimateFilterThreadProgress(&sg_ThreadFilterFace[i].m_ThreadProgress);
 
-         _snprintf_s(threadProgressString,
-            CP_MAX_PROGRESS_STRING,
+         snprintf(threadProgressString,
             CP_MAX_PROGRESS_STRING,
             "Thread %d: %5.2f%% Complete (Level %3d, Face %3d, Row %3d)\n", 
 			i,
@@ -2646,16 +2616,17 @@ const char *CCubeMapProcessor::GetFilterProgressString(void)
       }
       else
       {
+#ifdef WIN32
          //set arrow
          SetCursor(LoadCursor(NULL, IDC_ARROW ));
+#endif
 
-		 _snprintf_s(threadProgressString, 
-            CP_MAX_PROGRESS_STRING,
+            snprintf(threadProgressString,             
             CP_MAX_PROGRESS_STRING,
             "Thread %d: Ready\n", i);   
       }
 
-	  strcat_s(m_ProgressString, CP_MAX_PROGRESS_STRING, threadProgressString);
+	  strncat(m_ProgressString, threadProgressString, CP_MAX_PROGRESS_STRING);
    }
    // SL END
 
@@ -2696,13 +2667,13 @@ SThreadFilterFace* CCubeMapProcessor::sg_ThreadFilterFace;
 //Thread functions used to run filtering routines in the CPU0 process
 // note that these functions can not be member functions since thread initiation
 // must start from a global or static global function
-DWORD WINAPI ThreadProcFilterFace(LPVOID a_ThreadIdx)
+unsigned long WINAPI ThreadProcFilterFace(int32 a_ThreadIdx)
 {
     CBBoxInt32    filterExtents[6];   //bounding box per face to specify region to process
                                       // note that pixels within these regions may be rejected 
                                       // based on the
 	// Alias
-	SThreadFilterFace* tff = &CCubeMapProcessor::sg_ThreadFilterFace[(int32)a_ThreadIdx];
+	SThreadFilterFace* tff = &CCubeMapProcessor::sg_ThreadFilterFace[a_ThreadIdx];
 		
 	// Thread will process one face
 	CP_ITYPE *texelPtr	= tff->m_DstCubeMap[tff->m_FaceIdx].m_ImgData;
@@ -2789,16 +2760,8 @@ void CCubeMapProcessor::FilterCubeSurfacesMultithread(CImageSurface *a_SrcCubeMa
     // reside within the cone angle
     dotProdThresh = cosf( ((float32)CP_PI / 180.0f) * filterAngle );
 
-    //process required faces
-	SECURITY_ATTRIBUTES secAttr;
-
-	//thread security attributes for thread1
-	secAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
-	secAttr.lpSecurityDescriptor = NULL;            //use same security descriptor as parent
-	secAttr.bInheritHandle = TRUE;                  //handle is inherited by new processes spawning from this one
-
-	int32 FaceIdx = 0;
-	INT NumAliveThread = 0;
+   	int32 FaceIdx = 0;
+	int NumAliveThread = 0;
 	bool8* CurrentThreadReady = new bool8[m_NumFilterThreads];
 
 	for (int32 i = 0; i < m_NumFilterThreads; ++i)
@@ -2842,13 +2805,8 @@ void CCubeMapProcessor::FilterCubeSurfacesMultithread(CImageSurface *a_SrcCubeMa
 				sg_ThreadFilterFace[ThreadIdx].m_ThreadProgress.m_EndFace			= FaceIdx; // unused
 
 				// Create thread
-				sg_ThreadFilterFace[ThreadIdx].m_ThreadHandle = CreateThread(	&secAttr,                     //security attributes
-																				0,                            //0 is sentinel for use default stack size
-																				ThreadProcFilterFace,         //LPTHREAD_START_ROUTINE
-																				(LPVOID)ThreadIdx,            // pass the thread index
-																				NULL,                         // no creation flags (run thread immediately)
-																				&sg_ThreadFilterFace[ThreadIdx].m_ThreadID );
-
+				sg_ThreadFilterFace[ThreadIdx].m_Future = std::async(std::launch::async, ThreadProcFilterFace, ThreadIdx);
+				
 				CurrentThreadReady[ThreadIdx] = false;
 				FaceIdx++;
 				NumAliveThread++;
@@ -3121,7 +3079,7 @@ void CCubeMapProcessor::FilterCubeMapMipChainMultithread(float32 a_BaseFilterAng
 		if ( a_FilterType == CP_FILTER_TYPE_COSINE_POWER && a_MCO.CosinePowerMipmapChainMode == CP_COSINEPOWER_CHAIN_MIPMAP && a_MCO.NumMipmap > 1)
 		{
 			int32 NumMipmap			= min(a_MCO.NumMipmap, Num);
-			float32 Glossiness		= (NumMipmap == 1) ? 1.0f : max(1.0f - (FLOAT)(LevelIndex) / (FLOAT)(NumMipmap - 1), 0.0f);
+			float32 Glossiness		= (NumMipmap == 1) ? 1.0f : max(1.0f - (float)(LevelIndex) / (float)(NumMipmap - 1), 0.0f);
 			// This function must match the decompression function of the engine.
 			specularPower = powf(2.0f, a_MCO.GlossScale * Glossiness + a_MCO.GlossBias);
 			// take count of the lighting model

@@ -13,14 +13,14 @@
 uint32 sg_MessageType = EM_DEFAULT_MESSAGE_MEDIUM;
 
 //MessageOutputCallback
-void (*sg_MessageOutputCallback)(WCHAR *, WCHAR *) = DefaultErrorMessageCallback; 
+void (*sg_MessageOutputCallback)(const char *, const char *) = DefaultErrorMessageCallback; 
 
 
 //--------------------------------------------------------------------------------------
 // SetErrorMessageCallback
 //
 //--------------------------------------------------------------------------------------
-void DefaultErrorMessageCallback(WCHAR *a_Title, WCHAR *a_Message )
+void DefaultErrorMessageCallback(const char *a_Title, const char *a_Message )
 {
    MessageBox(NULL, a_Message, a_Title, MB_OK);
 }
@@ -30,7 +30,7 @@ void DefaultErrorMessageCallback(WCHAR *a_Title, WCHAR *a_Message )
 // SetErrorMessageCallback
 //
 //--------------------------------------------------------------------------------------
-void SetErrorMessageCallback( void(*a_MessageOutputFunc)(WCHAR *, WCHAR *) )
+void SetErrorMessageCallback( void(*a_MessageOutputFunc)(const char *, const char *) )
 {
    sg_MessageType = EM_MESSAGE_MEDIUM_CALLBACK_FUNCTION;
    sg_MessageOutputCallback = a_MessageOutputFunc;
@@ -44,7 +44,7 @@ void SetErrorMessageCallback( void(*a_MessageOutputFunc)(WCHAR *, WCHAR *) )
 //   mechanism..  in the future output could be rerouted through the console using 
 //   this mechanism.
 //--------------------------------------------------------------------------------------
-void OutputMessageString(WCHAR *a_Title, WCHAR *a_Message )
+void OutputMessageString(const char *a_Title, const char *a_Message )
 {
    switch(sg_MessageType)
    {
@@ -63,41 +63,46 @@ void OutputMessageString(WCHAR *a_Title, WCHAR *a_Message )
 //--------------------------------------------------------------------------------------
 // variable arguement version of output message
 //--------------------------------------------------------------------------------------
-void OutputMessage(WCHAR *a_Message, ... )
+void OutputMessage(const char *a_Message, ... )
 {   
     int32 numCharOutput = 0;
-    WCHAR msgBuffer[EM_MAX_MESSAGE_LENGTH];
+    char msgBuffer[EM_MAX_MESSAGE_LENGTH];
     va_list args;
     va_start(args, a_Message);
 
-    numCharOutput = _vsnwprintf_s( msgBuffer, EM_MAX_MESSAGE_LENGTH, EM_MAX_MESSAGE_LENGTH, a_Message, args);
+    
+    numCharOutput = snprintf( msgBuffer, EM_MAX_MESSAGE_LENGTH, a_Message, args);
 
     //va_end(args, a_Message);
-    OutputMessageString(L"Message:", msgBuffer);
+    OutputMessageString("Message:", msgBuffer);
 }
 
 //--------------------------------------------------------------------------------------
 // displays the message with a YES / NO response; returns true on YES and false on NO
 //--------------------------------------------------------------------------------------
-bool OutputQuestion( WCHAR *a_Message, ... )
+bool OutputQuestion( const char *a_Message, ... )
 {
-   WCHAR msgBuffer[ EM_MAX_MESSAGE_LENGTH ];
+#ifndef WIN32
+     exit(-1);
+#else
+   char msgBuffer[ EM_MAX_MESSAGE_LENGTH ];
    va_list args;
    va_start( args, a_Message );
 
-   _vsnwprintf_s( msgBuffer, EM_MAX_MESSAGE_LENGTH, EM_MAX_MESSAGE_LENGTH, a_Message, args );
+   snprintf( msgBuffer, EM_MAX_MESSAGE_LENGTH, a_Message, args );
 
    switch( sg_MessageType )
    {
       case EM_MESSAGE_MEDIUM_MESSAGEBOX:
-         return MessageBox( NULL, msgBuffer, L"Question:", MB_YESNO ) == IDYES;
+         return MessageBox( NULL, msgBuffer, "Question:", MB_YESNO ) == IDYES;
       break;
       case EM_MESSAGE_MEDIUM_CALLBACK_FUNCTION:
-         sg_MessageOutputCallback( L"Question:", msgBuffer );
+         sg_MessageOutputCallback( "Question:", msgBuffer );
       break;
       default:
       break;
    }
+#endif
    return false;
 }
 
@@ -105,21 +110,21 @@ bool OutputQuestion( WCHAR *a_Message, ... )
 // output message if HRESULT indicates failure
 //  
 //--------------------------------------------------------------------------------------
-HRESULT OutputMessageOnFail(HRESULT a_hr, WCHAR *a_Message, ... )
+HRESULT OutputMessageOnFail(HRESULT a_hr, const char *a_Message, ... )
 {   
     int32 numCharOutput = 0;
-    WCHAR msgBuffer[EM_MAX_MESSAGE_LENGTH];
+    char msgBuffer[EM_MAX_MESSAGE_LENGTH];
     va_list args;
 
     if(FAILED(a_hr))
     {
         va_start(args, a_Message);
 
-        numCharOutput = _vsnwprintf_s( msgBuffer, EM_MAX_MESSAGE_LENGTH, EM_MAX_MESSAGE_LENGTH, a_Message, args);
+        numCharOutput = snprintf( msgBuffer, EM_MAX_MESSAGE_LENGTH, a_Message, args);
 
         //va_end(args, a_Message);
 
-        OutputMessageString(L"Error!", msgBuffer);
+        OutputMessageString("Error!", msgBuffer);
     }
 
     return a_hr;
@@ -130,21 +135,21 @@ HRESULT OutputMessageOnFail(HRESULT a_hr, WCHAR *a_Message, ... )
 // output message and exit program if HRESULT indicates failure
 //  
 //--------------------------------------------------------------------------------------
-HRESULT OutputFatalMessageOnFail(HRESULT a_hr, WCHAR *a_Message, ... )
+HRESULT OutputFatalMessageOnFail(HRESULT a_hr, const char *a_Message, ... )
 {   
     int32 numCharOutput = 0;
-    WCHAR msgBuffer[EM_MAX_MESSAGE_LENGTH];
+    char msgBuffer[EM_MAX_MESSAGE_LENGTH];
     va_list args;
 
     if(FAILED(a_hr))
     {
         va_start(args, a_Message);
 
-        numCharOutput = _vsnwprintf_s( msgBuffer, EM_MAX_MESSAGE_LENGTH, EM_MAX_MESSAGE_LENGTH, a_Message, args);
+        numCharOutput = snprintf( msgBuffer, EM_MAX_MESSAGE_LENGTH, a_Message, args);
 
         //va_end(args, a_Message);
 
-        OutputMessageString(L"Fatal Error!", msgBuffer);
+        OutputMessageString("Fatal Error!", msgBuffer);
         exit(EM_FATAL_ERROR);
     }
 
